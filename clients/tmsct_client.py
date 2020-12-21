@@ -22,6 +22,7 @@ class TMSCT_client(TechmanClient):
    # Percentages are a float between 0.0 and 1.0
 
    # TODO: Add support for return values
+   # TODO: Probably have to expand arrays to individual args
 
    PORT=5890
 
@@ -82,6 +83,41 @@ class TMSCT_client(TechmanClient):
 
    def resume_project(self):
       return self._execute_command(('Resume', []))
+
+   # NOTE: 'base' argument can be either config name (string) or coordinate frame 
+   def set_base(self, base):
+      return self._execute_command(('ChangeBase', [base]))
+
+   # NOTE: 'tcp' argument can be either config name (string) or coordinate frame 
+   def set_tcp(self, tcp, weight=None, inertia=None):
+      arglist = [tcp]
+      if weight is not None: arglist.append(weight)
+      if inertia is not None: arglist.append(inertia)
+      return self._execute_command(('ChangeTCP', arglist))
+
+   def set_load_weight(self, weight):
+      return self._execute_command(('ChangeLoad', [weight]))
+
+   def enter_point_pvt_mode(self):
+      return self._execute_command(('PVTEnter', [1]))
+
+   def add_pvt_point(self, tcp_point_goal, tcp_point_velocities_goal, duration):
+      return self._execute_command(('PVTPoint', [tcp_point_goal, tcp_point_velocities_goal, duration/1000.0]))
+
+   def enter_joint_pvt_mode(self):
+      return self._execute_command(('PVTEnter', [0]))
+
+   def add_pvt_joint_angles(self, joint_angles_goal, joint_angle_velocities_goal, duration):
+      return self._execute_command(('PVTPoint', [joint_angles_goal, joint_angle_velocities_goal, duration/1000.0]))
+
+   def exit_pvt_mode(self):
+      return self._execute_command(('PVTExit', []))
+
+   def pause_pvt_mode(self):
+      return self._execute_command(('PVTPause', []))
+
+   def resume_pvt_mode(self):
+      return self._execute_command(('PVTResume', []))
 
    # ==== PTP ====
 
@@ -151,8 +187,8 @@ class TMSCT_client(TechmanClient):
 
 
 if __name__ == "__main__":
-   pass
-   # clnt = TMSCT_client(robot_ip='localhost')
+   # clnt = TMSCT_client(robot_ip='localhost', id='client_demo')
    # try: status = clnt.get_queue_tag_status(3)
    # except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
    # print(f'Status: {status}')
+   pass
