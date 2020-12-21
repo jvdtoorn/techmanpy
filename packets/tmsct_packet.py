@@ -48,7 +48,7 @@ class TMSCT_packet(TechmanPacket):
       handle_id = data[:data.find(',')]
       payload = data[data.find(',')+1:]
       status = TMSCT_status.SUCCESS if TMSCT_status.SUCCESS in payload else None
-      status = TMSCT_status.ERROR if TMSCT_status.ERROR in payload else None
+      if status is None: status = TMSCT_status.ERROR if TMSCT_status.ERROR in payload else None
       ptype = TMSCT_type.REQUEST if status is None else TMSCT_type.RESPONSE
       if ptype == TMSCT_type.REQUEST:
          commands = payload.split('\r\n')

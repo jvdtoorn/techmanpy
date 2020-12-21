@@ -45,7 +45,7 @@ class TMSCT_client(TechmanClient):
       assert res.handle_id == handle_id
       assert res.ptype == TMSCT_type.RESPONSE
       if len(res.lines) > 0:
-         commands = [res.commands[i] for i in res.lines]
+         commands = [req.commands[i] for i in res.lines]
          enc_cmnds = list(map(req._encode_command, commands))
          if res.status == TMSCT_status.SUCCESS:
             if len(res.lines) == 1:
@@ -180,31 +180,33 @@ class TMSCT_client(TechmanClient):
 
    # ==== Line ====
 
-   # NOTE: Speed could also be defined as a velocity
-   # NOTE: Blending value could also be defined as a radius
-   def move_to_point_line(self, tcp_point_goal, speed_perc, acceleration_duration, blending_perc, use_precise_positioning=False):
-      if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTException('Percentages should have value between 0.0 and 1.0')
+   def move_to_point_line(self, tcp_point_goal, speed, acceleration_duration, blending, speed_is_velocity=False, blending_is_radius=False, use_precise_positioning=False):
+      if (not speed_is_velocity and speed > 1.0) or (not blending_is_radius and blending > 1.0): raise TMSCTException('Percentages should have value between 0.0 and 1.0')
       if len(tcp_point_goal) != 6: raise TMSCTException('Position array should have exactly 6 elements')
-      return self._execute_command(('Line', ['CPP', tcp_point_goal, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), not use_precise_positioning]))
-      
-   # NOTE: Speed could also be defined as a velocity
-   # NOTE: Blending value could also be defined as a radius
-   def move_to_relative_point_line(self, relative_point_goal, speed_perc, acceleration_duration, blending_perc, relative_to_tcp=False, use_precise_positioning=False):
-      if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTException('Percentages should have value between 0.0 and 1.0')
+      data_mode = 'C%s%s' % ('A' if speed_is_velocity else 'P', 'R' if blending_is_radius else 'P')
+      speed = int(speed if speed_is_velocity else (100 * speed))
+      blending = int(blending if blending_is_radius else (100 * blending))
+      return self._execute_command(('Line', [data_mode, tcp_point_goal, speed, int(acceleration_duration), blending, not use_precise_positioning]))
+
+   def move_to_relative_point_line(self, relative_point_goal, speed, acceleration_duration, blending, relative_to_tcp=False, speed_is_velocity=False, blending_is_radius=False, use_precise_positioning=False):
+      if (not speed_is_velocity and speed > 1.0) or (not blending_is_radius and blending > 1.0): raise TMSCTException('Percentages should have value between 0.0 and 1.0')
       if len(relative_point_goal) != 6: raise TMSCTException('Position array should have exactly 6 elements')
-      return self._execute_command(('Move_Line', ['TPP' if relative_to_tcp else 'CPP', relative_point_goal, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), not use_precise_positioning]))
+      data_mode = '%s%s%s' % ('T' if relative_to_tcp else 'C', 'A' if speed_is_velocity else 'P', 'R' if blending_is_radius else 'P')
+      speed = int(speed if speed_is_velocity else (100 * speed))
+      blending = int(blending if blending_is_radius else (100 * blending))
+      return self._execute_command(('Move_Line', [data_mode, relative_point_goal, speed, int(acceleration_duration), blending, not use_precise_positioning]))
 
-   # ==== other move commmands ====
+   # ==== Circle ====
 
-   # NOTE: Speed could also be defined as a velocity
-   def move_on_circle(self, tcp_point_1, tcp_point_2, speed_perc, acceleration_duration, blending_perc, arc_angle, use_precise_positioning=False):
-      if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTException('Percentages should have value between 0.0 and 1.0')
+   def move_on_circle(self, tcp_point_1, tcp_point_2, speed, acceleration_duration, blending_perc, arc_angle, speed_is_velocity=False, use_precise_positioning=False):
+      if (not speed_is_velocity and speed > 1.0) or blending_perc > 1.0: raise TMSCTException('Percentages should have value between 0.0 and 1.0')
       if len(tcp_point_1) != 6 or len(tcp_point_2) != 6: raise TMSCTException('Position array should have exactly 6 elements')
-      return self._execute_command(('Circle', ['CPP', tcp_point_1, tcp_point_2, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), arc_angle, not use_precise_positioning]))
+      speed = int(speed if speed_is_velocity else (100 * speed))
+      return self._execute_command(('Circle', ['CAP' if speed_is_velocity else 'CPP', tcp_point_1, tcp_point_2, speed, int(acceleration_duration), int(100 * blending_perc), arc_angle, not use_precise_positioning]))
 
 
 if __name__ == "__main__":
-   clnt = TMSCT_client(robot_ip='localhost', id='client_demo')
+   clnt = TMSCT_client(robot_ip='localhost', id='demo_client')
    clnt.start_transaction()
    clnt.move_to_joint_angles_ptp([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 0.33, 200, 0.10)
    clnt.pause_project()
