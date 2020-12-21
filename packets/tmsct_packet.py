@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 
 import ast
+
 from techman_packet import TechmanPacket
 
-class TMSCT_packet(TechmanPacket):
+class TMSCT_command_type:
 
    FUNCTION=0
    VARIABLE=1
 
+class TMSCT_packet(TechmanPacket):
+
    def __init__(self, *args):
-      if len(args) == 1: super(TMSCT_packet, self).__init__(args)
+      if len(args) == 1:
+         # Instantiated with TechmanPacket object
+         if isinstance(args[0], TechmanPacket):
+            self._header = args[0]._header
+            self._data = args[0]._data
+         # Instantiated with raw packet data
+         else: super(TMSCT_packet, self).__init__(*args)
+      # Instantiated with payload data
       elif len(args) == 2:
          self._header = 'TMSCT'
          self._data = self._encode_data(args[0], args[1])
@@ -24,10 +34,10 @@ class TMSCT_packet(TechmanPacket):
       return handle_id, list(map(self._decode_command, commands))
 
    def _decode_command(self, command):
-      if '(' not in command: return self.VARIABLE, command
+      if '(' not in command: return TMSCT_command_type.VARIABLE, command
       name = command[:command.find('(')]
       args = command[command.find('(')+1:command.find(')')].replace(' ', '')
-      return self.FUNCTION, name, ast.literal_eval('[' + args + ']')
+      return TMSCT_command_type.FUNCTION, name, ast.literal_eval('[' + args + ']')
 
    @property
    def handle_id(self): return self._decode_data(self._data)[0]

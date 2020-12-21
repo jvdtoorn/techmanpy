@@ -2,28 +2,37 @@
 
 from techman_packet import TechmanPacket
 
+class TMSTA_type:
+
+   IN_LISTEN_MODE=0
+   QUEUE_TAG=1
+
 class TMSTA_packet(TechmanPacket):
 
-   LISTEN_MODE=0
-   QUEUE=1
-
    def __init__(self, *args):
-      if len(args) == 1: super(TMSTA_packet, self).__init__(args)
+      if len(args) == 1:
+         # Instantiated with TechmanPacket object
+         if isinstance(args[0], TechmanPacket):
+            self._header = args[0]._header
+            self._data = args[0]._data
+         # Instantiated with raw packet data
+         else: super(TMSTA_packet, self).__init__(*args)
+      # Instantiated with payload data
       elif len(args) == 2:
          self._header = 'TMSTA'
          self._data = self._encode_data(args[0], args[1])
 
-   def _encode_data(self, mode, params):
-      if isinstance(mode, int): mode = self._encode_int(mode)
-      if params is None: return '%s' % mode
+   def _encode_data(self, ptype, params):
+      if isinstance(ptype, int): ptype = self._encode_int(ptype)
+      if params is None: return '%s' % ptype
       params = ','.join(list(map(self._encode_param, params)))
-      return '%s,%s' % (mode, params)
+      return '%s,%s' % (ptype, params)
 
    def _decode_data(self, data):
       if ',' not in data: return self._decode_int(data), None
-      mode = self._decode_int(data[:data.find(',')])
+      ptype = self._decode_int(data[:data.find(',')])
       params = data[data.find(',')+1:].split(',')
-      return mode, list(map(self._decode_param, params))
+      return ptype, list(map(self._decode_param, params))
 
    def _encode_param(self, param):
       if param is None: return 'none'
@@ -49,14 +58,14 @@ class TMSTA_packet(TechmanPacket):
       else: return int(str)
 
    @property
-   def mode(self): return self._decode_data(self._data)[0]
+   def ptype(self): return self._decode_data(self._data)[0]
 
    @property
    def params(self): return self._decode_data(self._data)[1]
 
 
 if __name__ == "__main__":
-   msg = TMSTA_packet(TMSTA_packet.QUEUE, [None])
+   msg = TMSTA_packet(TMSTA_type.QUEUE_TAG, [None])
    print(msg.encoded())
-   print(msg.mode)
+   print(msg.ptype)
    print(msg.params)

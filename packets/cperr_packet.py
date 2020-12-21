@@ -2,7 +2,7 @@
 
 from techman_packet import TechmanPacket
 
-class CPERR_code():
+class CPERR_code:
 
    SUCCESS=0x00
    PACKET_ERR=0x01
@@ -24,7 +24,13 @@ class CPERR_code():
 class CPERR_packet(TechmanPacket):
 
    def __init__(self, *args):
-      if not isinstance(args[0], int): super(CPERR_packet, self).__init__(args)
+      # Instantiated with TechmanPacket object
+      if isinstance(args[0], TechmanPacket):
+         self._header = args[0]._header
+         self._data = args[0]._data
+      # Instantiated with raw packet data
+      elif not isinstance(args[0], int): super(CPERR_packet, self).__init__(*args)
+      # Instantiated with payload data
       else:
          self._header = 'CPERR'
          self._data = self._encode_data(args[0])

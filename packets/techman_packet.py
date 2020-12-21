@@ -16,11 +16,11 @@ class TechmanPacket:
       checksum_data = '%s,%d,%s,' % (header, len(data), data)
       checksum = 0b0
       utf_str = checksum_data.encode('utf-8')
-      if sys.version_info[0] < 3: ba = bytearray(); ba.extend(utf_str); utf_str = ba
       for byte in utf_str: checksum ^= byte
       return '$%s*%s\r\n' % (checksum_data, '{:02x}'.format(checksum).upper())
 
    def _decode(self, packet):
+      if isinstance(packet, bytes): packet = packet.decode('utf-8')
       header = packet[1:self._find_nth(packet, ',', 1)]
       data_length = int(packet[self._find_nth(packet, ',', 1)+1:self._find_nth(packet, ',', 2)])
       data = packet[self._find_nth(packet, ',', 2)+1:self._find_nth(packet, ',', 2)+1+data_length]
@@ -33,4 +33,4 @@ class TechmanPacket:
          n -= 1
       return start
 
-   def encoded(self): return self._encode(self._header, self._data)
+   def encoded(self): return self._encode(self._header, self._data).encode('utf-8')
