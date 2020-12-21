@@ -9,6 +9,9 @@ parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from packets.packets import *
 
+class TechmanException(Exception):
+   pass
+
 class TechmanClient:
 
    def __init__(self, *, robot_ip, robot_port):
@@ -29,19 +32,22 @@ class TechmanClient:
    async def _send_async(self, techman_packet):
       if not self._is_connected:
          if await self._connect_async(): self._is_connected = True
-         else: raise ConnectionError('[TechmanClient] ERROR: Could not connect to robot')
+         else: raise TechmanException('Could not connect to robot at %s:%s' % (self._robot_ip, self._robot_port))
       self._writer.write(techman_packet.encoded())
       read_bytes = await self._reader.read(1024)
       if read_bytes == b'':
          if self._reconnect_cnt > 5:
             self._reconnect_cnt = 0
-            raise ConnectionError('[TechmanClient] ERROR: Could not connect to robot')
+            raise TechmanException('Could not connect to robot at %s:%s' % (self._robot_ip, self._robot_port))
          self._reconnect_cnt += 1
          self._is_connected = False
          return await self._send_async(techman_packet)
       else: 
          self._reconnect_cnt = 0
-         return TechmanPacket(read_bytes)
+         res = TechmanPacket(read_bytes)
+         if res._header == 'CPERR':
+            raise TechmanException(CPERR_packet(res).description)
+         else: return res
 
    def __del__(self):
       if hasattr(self, '_writer'):

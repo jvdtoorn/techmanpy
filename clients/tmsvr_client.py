@@ -2,7 +2,7 @@
 
 import asyncio
 
-from techman_client import TechmanClient
+from techman_client import TechmanException, TechmanClient
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -10,6 +10,9 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from packets.packets import *
+
+class TMSVRException(TechmanException):
+   pass
 
 class TMSVR_client(TechmanClient):
 
@@ -26,12 +29,11 @@ class TMSVR_client(TechmanClient):
       self._msg_cnt += 1
       req = TMSVR_packet(handle_id, TMSVR_type.READ_REQUEST, items)
       # Submit
-      res = self.send(req)
-      svr_res = TMSVR_packet(res)
+      res = TMSVR_packet(self.send(req))
       # Parse response
-      assert svr_res.handle_id == handle_id
-      assert svr_res.ptype == TMSVR_type.READ_RESPONSE
-      return svr_res.items
+      assert res.handle_id == handle_id
+      assert res.ptype == TMSVR_type.READ_RESPONSE
+      return res.items
 
    def get_value(self, key):
       return self.get_values({key})
@@ -42,13 +44,12 @@ class TMSVR_client(TechmanClient):
       self._msg_cnt += 1
       req = TMSVR_packet(handle_id, TMSVR_type.WRITE_REQUEST, items)
       # Submit
-      res = self.send(req)
-      svr_res = TMSVR_packet(res)
+      res = TMSVR_packet(self.send(req))
       # Parse response
-      assert svr_res.handle_id == handle_id
-      assert svr_res.ptype == TMSVR_type.WRITE_RESPONSE
-      if svr_res.status != TMSVR_status.SUCCESS:
-         raise Exception('[TMSVR] ERROR: %s (data: %s)' % (TMSVR_status.description(svr_res.status), svr_res.errdata))
+      assert res.handle_id == handle_id
+      assert res.ptype == TMSVR_type.WRITE_RESPONSE
+      if res.status != TMSVR_status.SUCCESS:
+         raise TMSVRException('%s (data: %s)' % (res.errdesc, res.errdata))
 
    def set_value(self, key, value):
       return self.set_values({key: value})
@@ -57,4 +58,4 @@ class TMSVR_client(TechmanClient):
 if __name__ == "__main__":
    clnt = TMSVR_client(robot_ip='localhost', id='demo_client')
    try: clnt.set_value('Robot_Link', [3, 4])
-   except Exception as e: print(str(e))
+   except TechmanException as e: print(type(e).__name__ + ': ' + str(e))

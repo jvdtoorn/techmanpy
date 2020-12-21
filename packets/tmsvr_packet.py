@@ -124,6 +124,9 @@ class TMSVR_packet(TechmanPacket):
    def errdata(self): return self._decode_data(self._data)[3]
 
    @property
+   def errdesc(self): return TMSVR_status.description(self.status)
+
+   @property
    def items(self): return self._decode_data(self._data)[2]
 
 
