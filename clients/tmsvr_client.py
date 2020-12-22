@@ -108,8 +108,11 @@ async def shutdown(loop, signal=None):
 if __name__ == "__main__":
 
    clnt = TMSVR_client(robot_ip='10.66.0.117', id='DC')
-   print('1')
-   clnt.set_value('Camera_Light', 0)
+   try: clnt.set_value('Camera_Light', 0) # could do more than 1 read if SVR intervenes
+   except: print('too bad')
+
+   # exit
+
    print('2')
    print('value: ' + str(clnt.get_value('Camera_Light')))
    print('hallo?')

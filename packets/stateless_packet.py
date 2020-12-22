@@ -2,7 +2,7 @@
 
 import sys
 
-class TechmanPacket:
+class StatelessPacket:
 
    def __init__(self, *args):
       self._header, self._data = None, None

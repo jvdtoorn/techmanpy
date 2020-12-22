@@ -2,7 +2,7 @@
 
 import ast
 
-from techman_packet import TechmanPacket
+from stateful_packet import StatefulPacket
 
 # NOTE: Make sure that the Ethernet Slave format is set to 'string'
 
@@ -45,14 +45,14 @@ class TMSVR_status:
       if status == TMSVR_status.MODE_PROTECTED: return 'Can\'t write in the current control mode, try switching to auto mode'
       if status == TMSVR_status.VARTYPE_MISMATCH: return 'Values to write mismatches with the configured type or the size.'
 
-class TMSVR_packet(TechmanPacket):
+class TMSVR_packet(StatefulPacket):
 
    HEADER='TMSVR'
 
    def __init__(self, *args):
       if len(args) == 1:
-         # Instantiated with TechmanPacket object
-         if isinstance(args[0], TechmanPacket):
+         # Instantiated with StatefulPacket object
+         if isinstance(args[0], StatefulPacket):
             self._header = args[0]._header
             self._data = args[0]._data
          # Instantiated with raw packet data
@@ -63,9 +63,9 @@ class TMSVR_packet(TechmanPacket):
          self._data = self._encode_data(*args)
 
    def _encode_data(self, *args):
-      handle_id = args[0]
+      encoded = super(TMSVR_packet, self)._encode_data(args[0])
       ptype = args[1]
-      encoded = '%s,%s,' % (handle_id, ptype)
+      encoded += '%s,' % ptype
       if ptype == TMSVR_type.VALUE_REQUEST:
          for variable in args[2]:
             encoded += '%s\r\n' % variable
@@ -81,24 +81,23 @@ class TMSVR_packet(TechmanPacket):
       return encoded
 
    def _decode_data(self, data):
-      handle_id = data[:data.find(',')]
       ptype = int(data[self._find_nth(data, ',', 1)+1:self._find_nth(data, ',', 2)])
       payload = data[self._find_nth(data, ',', 2)+1:]
       # Correct protocol bug
       if ptype == TMSVR_type.VALUE_REQUEST and '=' in payload: ptype = TMSVR_type.VALUE_DATA
       # Decode payload based on packet type
       if ptype == TMSVR_type.VALUE_REQUEST:
-         return handle_id, ptype, set(payload.split('\r\n'))
+         return ptype, set(payload.split('\r\n'))
       if ptype == TMSVR_type.VALUE_DATA:
          items = {}
          for varval in payload.split('\r\n'):
             var, val = varval.split('=')
             items[var] = self._decode_value(val)
-         return handle_id, ptype, items
+         return ptype, items
       if ptype == TMSVR_type.RESPONSE_STATUS:
          status = TMSVR_status.value(int(payload[:payload.find(',')], 16))
          errdata = None if ';' not in payload else payload[payload.find(';')+1:]
-         return handle_id, ptype, status, errdata
+         return ptype, status, errdata
 
    def _encode_value(self, value):
       if isinstance(value, str): return '"%s"' % value
@@ -116,22 +115,19 @@ class TMSVR_packet(TechmanPacket):
       return ast.literal_eval(value)
 
    @property
-   def handle_id(self): return self._decode_data(self._data)[0]
+   def ptype(self): return self._decode_data(self._data)[0]
 
    @property
-   def ptype(self): return self._decode_data(self._data)[1]
+   def status(self): return self._decode_data(self._data)[1]
 
    @property
-   def status(self): return self._decode_data(self._data)[2]
-
-   @property
-   def errdata(self): return self._decode_data(self._data)[3]
+   def errdata(self): return self._decode_data(self._data)[2]
 
    @property
    def errdesc(self): return TMSVR_status.description(self.status)
 
    @property
-   def items(self): return self._decode_data(self._data)[2]
+   def items(self): return self._decode_data(self._data)[1]
 
 
 if __name__ == "__main__":

@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
-from techman_packet import TechmanPacket
+from stateless_packet import StatelessPacket
 
 class TMSTA_type:
 
    IN_LISTEN_MODE=0
    QUEUE_TAG=1
 
-class TMSTA_packet(TechmanPacket):
+class TMSTA_packet(StatelessPacket):
 
    HEADER='TMSTA'
 
    def __init__(self, *args):
       if len(args) == 1:
-         # Instantiated with TechmanPacket object
-         if isinstance(args[0], TechmanPacket):
+         # Instantiated with StatelessPacket object
+         if isinstance(args[0], StatelessPacket):
             self._header = args[0]._header
             self._data = args[0]._data
          # Instantiated with raw packet data

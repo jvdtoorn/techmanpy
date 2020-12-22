@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from techman_packet import TechmanPacket
+from stateless_packet import StatelessPacket
 
 class CPERR_code:
 
@@ -21,13 +21,13 @@ class CPERR_code:
       if value == CPERR_code.NO_LISTEN: return 'Listen Node is not active'
       return 'Unknown error'
 
-class CPERR_packet(TechmanPacket):
+class CPERR_packet(StatelessPacket):
 
    HEADER='CPERR'
 
    def __init__(self, *args):
-      # Instantiated with TechmanPacket object
-      if isinstance(args[0], TechmanPacket):
+      # Instantiated with StatelessPacket object
+      if isinstance(args[0], StatelessPacket):
          self._header = args[0]._header
          self._data = args[0]._data
       # Instantiated with raw packet data

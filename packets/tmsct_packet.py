@@ -2,7 +2,7 @@
 
 import ast
 
-from techman_packet import TechmanPacket
+from stateful_packet import StatefulPacket
 
 class TMSCT_type:
 
@@ -19,14 +19,14 @@ class TMSCT_command_type:
    FUNCTION=0
    VARIABLE=1
 
-class TMSCT_packet(TechmanPacket):
+class TMSCT_packet(StatefulPacket):
 
    HEADER='TMSCT'
 
    def __init__(self, *args):
       if len(args) == 1:
-         # Instantiated with TechmanPacket object
-         if isinstance(args[0], TechmanPacket):
+         # Instantiated with StatefulPacket object
+         if isinstance(args[0], StatefulPacket):
             self._header = args[0]._header
             self._data = args[0]._data
          # Instantiated with raw packet data
@@ -37,28 +37,27 @@ class TMSCT_packet(TechmanPacket):
          self._data = self._encode_data(*args)
 
    def _encode_data(self, *args):
-      handle_id = args[0]
+      encoded = super(TMSCT_packet, self)._encode_data(args[0])
       ptype = args[1]
       if ptype == TMSCT_type.REQUEST:
          commands = '\r\n'.join(list(map(self._encode_command, args[2])))
-         return '%s,%s' % (str(handle_id), commands)
+         return encoded + commands
       if ptype == TMSCT_type.RESPONSE:
          if len(args[3]) == 0: return args[2]
-         return '%s,%s;%s' % (str(handle_id), args[2], ';'.join(list(map(str, args[3]))))
+         return encoded + '%s;%s' % (args[2], ';'.join(list(map(str, args[3]))))
 
    def _decode_data(self, data):
-      handle_id = data[:data.find(',')]
       payload = data[data.find(',')+1:]
       status = TMSCT_status.SUCCESS if TMSCT_status.SUCCESS in payload else None
       if status is None: status = TMSCT_status.ERROR if TMSCT_status.ERROR in payload else None
       ptype = TMSCT_type.REQUEST if status is None else TMSCT_type.RESPONSE
       if ptype == TMSCT_type.REQUEST:
          commands = payload.split('\r\n')
-         return handle_id, ptype, list(map(self._decode_command, commands))
+         return ptype, list(map(self._decode_command, commands))
       else:
          parts = payload.split(';')
          lines = [] if len(parts) == 1 else list(map(int, parts[1:]))
-         return handle_id, ptype, status, lines
+         return ptype, status, lines
 
    def _encode_command(self, command):
       if len(command) == 2 and command[0] == TMSCT_command_type.VARIABLE: return command[1]
@@ -78,19 +77,16 @@ class TMSCT_packet(TechmanPacket):
       return TMSCT_command_type.FUNCTION, name, ast.literal_eval('[' + args + ']')
 
    @property
-   def handle_id(self): return self._decode_data(self._data)[0]
+   def ptype(self): return self._decode_data(self._data)[0]
 
    @property
-   def ptype(self): return self._decode_data(self._data)[1]
+   def commands(self): return self._decode_data(self._data)[1]
 
    @property
-   def commands(self): return self._decode_data(self._data)[2]
+   def status(self): return self._decode_data(self._data)[1]
 
    @property
-   def status(self): return self._decode_data(self._data)[2]
-
-   @property
-   def lines(self): return self._decode_data(self._data)[3]
+   def lines(self): return self._decode_data(self._data)[2]
 
 
 if __name__ == "__main__":
