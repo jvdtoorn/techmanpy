@@ -41,7 +41,7 @@ class TMSTA_client(TechmanClient):
 
 
 if __name__ == "__main__":
-   clnt = TMSTA_client(robot_ip='localhost')
-   try: status = clnt.get_queue_tag_status(3)
+   clnt = TMSTA_client(robot_ip='10.66.0.117')
+   try: status = clnt.is_listen_node_active()
    except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
    print(f'Status: {status}')

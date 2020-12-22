@@ -35,11 +35,10 @@ class TMSCT_client(TechmanClient):
 
    def _execute_commands(self, commands):
       # Build TMSCT packet
-      handle_id = '%s_%d' % (self._id, self.g_cnt)
+      handle_id = '%s%d' % (self._id, self.g_cnt)
       self.g_cnt += 1
       req = TMSCT_packet(handle_id, TMSCT_type.REQUEST, commands)
       # Submit
-      print(req.encoded())
       res = TMSCT_packet(self.send(req))
       # Parse response
       assert res.handle_id == handle_id
@@ -206,11 +205,6 @@ class TMSCT_client(TechmanClient):
 
 
 if __name__ == "__main__":
-   clnt = TMSCT_client(robot_ip='localhost', id='demo_client')
-   clnt.start_transaction()
-   clnt.move_to_joint_angles_ptp([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 0.33, 200, 0.10)
-   clnt.pause_project()
-   clnt.set_base('NOTOOL')
-   clnt.resume_project()
-   try: clnt.submit_transaction()
+   clnt = TMSCT_client(robot_ip='10.66.0.117', id='DC')
+   try: clnt.set_load_weight(0.5)
    except TechmanException as e: print(type(e).__name__ + ': ' + str(e))

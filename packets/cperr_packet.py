@@ -23,6 +23,8 @@ class CPERR_code:
 
 class CPERR_packet(TechmanPacket):
 
+   HEADER='CPERR'
+
    def __init__(self, *args):
       # Instantiated with TechmanPacket object
       if isinstance(args[0], TechmanPacket):
@@ -32,7 +34,7 @@ class CPERR_packet(TechmanPacket):
       elif not isinstance(args[0], int): super(CPERR_packet, self).__init__(*args)
       # Instantiated with payload data
       else:
-         self._header = 'CPERR'
+         self._header = self.HEADER
          self._data = self._encode_data(args[0])
 
    def _encode_data(self, error_code):

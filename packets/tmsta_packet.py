@@ -9,6 +9,8 @@ class TMSTA_type:
 
 class TMSTA_packet(TechmanPacket):
 
+   HEADER='TMSTA'
+
    def __init__(self, *args):
       if len(args) == 1:
          # Instantiated with TechmanPacket object
@@ -19,7 +21,7 @@ class TMSTA_packet(TechmanPacket):
          else: super(TMSTA_packet, self).__init__(*args)
       # Instantiated with payload data
       elif len(args) == 2:
-         self._header = 'TMSTA'
+         self._header = self.HEADER
          self._data = self._encode_data(args[0], args[1])
 
    def _encode_data(self, ptype, params):

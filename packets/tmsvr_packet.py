@@ -48,6 +48,8 @@ class TMSVR_status:
 
 class TMSVR_packet(TechmanPacket):
 
+   HEADER='TMSVR'
+
    def __init__(self, *args):
       if len(args) == 1:
          # Instantiated with TechmanPacket object
@@ -58,7 +60,7 @@ class TMSVR_packet(TechmanPacket):
          else: super(TMSVR_packet, self).__init__(*args)
       # Instantiated with payload data
       else:
-         self._header = 'TMSVR'
+         self._header = self.HEADER
          self._data = self._encode_data(*args)
 
    def _encode_data(self, *args):
