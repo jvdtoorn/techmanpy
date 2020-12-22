@@ -8,10 +8,9 @@ from techman_packet import TechmanPacket
 
 class TMSVR_type:
 
-   READ_REQUEST=12
-   READ_RESPONSE=2
-   WRITE_REQUEST=2
-   WRITE_RESPONSE=0
+   RESPONSE_STATUS=0
+   VALUE_DATA=2
+   VALUE_REQUEST=12
 
 class TMSVR_status:
 
@@ -67,15 +66,15 @@ class TMSVR_packet(TechmanPacket):
       handle_id = args[0]
       ptype = args[1]
       encoded = '%s,%s,' % (handle_id, ptype)
-      if ptype == TMSVR_type.READ_REQUEST:
+      if ptype == TMSVR_type.VALUE_REQUEST:
          for variable in args[2]:
             encoded += '%s\r\n' % variable
          encoded = encoded[:len(encoded)-2]
-      elif ptype == TMSVR_type.WRITE_REQUEST: # same as TMSVR_type.READ_RESPONSE
+      elif ptype == TMSVR_type.VALUE_DATA:
          for variable, value in args[2].items():
             encoded += '%s=%s\r\n' % (variable, self._encode_value(value))
          encoded = encoded[:len(encoded)-2]
-      elif ptype == TMSVR_type.WRITE_RESPONSE:
+      elif ptype == TMSVR_type.RESPONSE_STATUS:
          encoded += '%s,' % '{:02x}'.format(args[2][0]).upper()
          if args[3] is None: encoded += args[2][1]
          else: encoded += '%s;%s' % (args[2][1], args[3])
@@ -85,15 +84,18 @@ class TMSVR_packet(TechmanPacket):
       handle_id = data[:data.find(',')]
       ptype = int(data[self._find_nth(data, ',', 1)+1:self._find_nth(data, ',', 2)])
       payload = data[self._find_nth(data, ',', 2)+1:]
-      if ptype == TMSVR_type.READ_REQUEST:
+      # Correct protocol bug
+      if ptype == TMSVR_type.VALUE_REQUEST and '=' in payload: ptype = TMSVR_type.VALUE_DATA
+      # Decode payload based on packet type
+      if ptype == TMSVR_type.VALUE_REQUEST:
          return handle_id, ptype, set(payload.split('\r\n'))
-      if ptype == TMSVR_type.WRITE_REQUEST: # same as TMSVR_type.READ_RESPONSE
+      if ptype == TMSVR_type.VALUE_DATA:
          items = {}
          for varval in payload.split('\r\n'):
             var, val = varval.split('=')
             items[var] = self._decode_value(val)
          return handle_id, ptype, items
-      if ptype == TMSVR_type.WRITE_RESPONSE:
+      if ptype == TMSVR_type.RESPONSE_STATUS:
          status = TMSVR_status.value(int(payload[:payload.find(',')], 16))
          errdata = None if ';' not in payload else payload[payload.find(';')+1:]
          return handle_id, ptype, status, errdata
@@ -133,33 +135,33 @@ class TMSVR_packet(TechmanPacket):
 
 
 if __name__ == "__main__":
-   msg = TMSVR_packet('S1', TMSVR_type.WRITE_RESPONSE, TMSVR_status.FORMAT_ERROR, None)
+   msg = TMSVR_packet('S1', TMSVR_type.RESPONSE_STATUS, TMSVR_status.FORMAT_ERROR, None)
    print(msg.encoded())
    print(msg.handle_id)
    print(msg.ptype)
    print(msg.status)
    print(msg.errdata)
 
-   msg = TMSVR_packet('S5', TMSVR_type.WRITE_RESPONSE, TMSVR_status.WRITE_PROTECTED, 'Robot_Link')
+   msg = TMSVR_packet('S5', TMSVR_type.RESPONSE_STATUS, TMSVR_status.WRITE_PROTECTED, 'Robot_Link')
    print(msg.encoded())
    print(msg.handle_id)
    print(msg.ptype)
    print(msg.status)
    print(msg.errdata)
 
-   msg = TMSVR_packet('S4', TMSVR_type.WRITE_REQUEST, {'Ctrl_DO32': 1})
+   msg = TMSVR_packet('S4', TMSVR_type.VALUE_DATA, {'Ctrl_DO32': 1})
    print(msg.encoded())
    print(msg.handle_id)
    print(msg.ptype)
    print(msg.items)
 
-   msg = TMSVR_packet('Q2', TMSVR_type.READ_REQUEST, {'Robot_Link', 'TCP_Mass'})
+   msg = TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link', 'TCP_Mass'})
    print(msg.encoded())
    print(msg.handle_id)
    print(msg.ptype)
    print(msg.items)
 
-   msg = TMSVR_packet('S7', TMSVR_type.WRITE_REQUEST, {'adata': [1, 2, 3]})
+   msg = TMSVR_packet('S7', TMSVR_type.VALUE_DATA, {'adata': [1, 2, 3]})
    print(msg.encoded())
    print(msg.handle_id)
    print(msg.ptype)
