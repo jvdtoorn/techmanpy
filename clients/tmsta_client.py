@@ -2,8 +2,7 @@
 
 import asyncio
 
-from stateless_client import StatelessClient
-from techman_client import TechmanException
+from stateless_client import StatelessClient, StatelessConnection
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -11,16 +10,19 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from packets.packets import *
-
-class TMSTAException(TechmanException):
-   pass
+from util.exceptions import * # pylint: disable=no-name-in-module
 
 class TMSTA_client(StatelessClient):
 
    PORT=5890
 
-   async def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip):
-      await super(TMSTA_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
+   def __init__(self, *, robot_ip, conn_timeout=3, suppress_warn=False):
+      super().__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
+
+   def _on_connection(self, reader, writer):
+      return TMSTA_connection(reader, writer, self._conn_timeout, self._suppress_warn)
+
+class TMSTA_connection(StatelessConnection):
 
    async def is_listen_node_active(self):
       # Build TMSTA packet

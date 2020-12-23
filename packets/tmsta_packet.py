@@ -2,6 +2,13 @@
 
 from stateless_packet import StatelessPacket
 
+# Import 'util' folder
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+if parentdir not in sys.path: sys.path.insert(0, parentdir)
+from util.exceptions import * # pylint: disable=no-name-in-module
+
 class TMSTA_type:
 
    IN_LISTEN_MODE=0
@@ -12,17 +19,19 @@ class TMSTA_packet(StatelessPacket):
    HEADER='TMSTA'
 
    def __init__(self, *args):
-      if len(args) == 1:
-         # Instantiated with StatelessPacket object
-         if isinstance(args[0], StatelessPacket):
-            self._header = args[0]._header
-            self._data = args[0]._data
-         # Instantiated with raw packet data
-         else: super(TMSTA_packet, self).__init__(*args)
-      # Instantiated with payload data
-      elif len(args) == 2:
-         self._header = self.HEADER
-         self._data = self._encode_data(args[0], args[1])
+      try:
+         if len(args) == 1:
+            # Instantiated with StatelessPacket object
+            if isinstance(args[0], StatelessPacket):
+               self._header = args[0]._header
+               self._data = args[0]._data
+            # Instantiated with raw packet data
+            else: super(TMSTA_packet, self).__init__(*args)
+         # Instantiated with payload data
+         elif len(args) == 2:
+            self._header = self.HEADER
+            self._data = self._encode_data(args[0], args[1])
+      except: raise TMParseError()
 
    def _encode_data(self, ptype, params):
       if isinstance(ptype, int): ptype = self._encode_int(ptype)

@@ -2,7 +2,7 @@
 
 import asyncio
 
-from techman_client import TechmanException, TechmanClient
+from techman_client import TechmanClient
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -10,6 +10,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from packets.packets import *
+from util.exceptions import * # pylint: disable=no-name-in-module
 
 class StatefulClient(TechmanClient):
 
@@ -21,6 +22,8 @@ class StatefulClient(TechmanClient):
       self._requests = [] # request: [req, future, age]
       if self._broadcast_callback is not None: self._start_listen()
 
+class StatefulConnection:
+
    async def send(self, techman_packet):
       if not self.is_connected and not await self._connect_async():
          raise TechmanException(str(self._conn_exception) + ' (' + type(self._conn_exception).__name__ + ')')
@@ -29,6 +32,7 @@ class StatefulClient(TechmanClient):
       self._requests.append([techman_packet, req_fut, 0])
       if not self._in_listen: self._start_listen()
       self._writer.write(techman_packet.encoded())
+      await self._writer.drain()
       # Wait until result
       return await req_fut
 

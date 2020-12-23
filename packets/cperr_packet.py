@@ -2,6 +2,13 @@
 
 from stateless_packet import StatelessPacket
 
+# Import 'util' folder
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+if parentdir not in sys.path: sys.path.insert(0, parentdir)
+from util.exceptions import * # pylint: disable=no-name-in-module
+
 class CPERR_code:
 
    SUCCESS=0x00
@@ -26,16 +33,18 @@ class CPERR_packet(StatelessPacket):
    HEADER='CPERR'
 
    def __init__(self, *args):
-      # Instantiated with StatelessPacket object
-      if isinstance(args[0], StatelessPacket):
-         self._header = args[0]._header
-         self._data = args[0]._data
-      # Instantiated with raw packet data
-      elif not isinstance(args[0], int): super(CPERR_packet, self).__init__(*args)
-      # Instantiated with payload data
-      else:
-         self._header = self.HEADER
-         self._data = self._encode_data(args[0])
+      try:
+         # Instantiated with StatelessPacket object
+         if isinstance(args[0], StatelessPacket):
+            self._header = args[0]._header
+            self._data = args[0]._data
+         # Instantiated with raw packet data
+         elif not isinstance(args[0], int): super(CPERR_packet, self).__init__(*args)
+         # Instantiated with payload data
+         else:
+            self._header = self.HEADER
+            self._data = self._encode_data(args[0])
+      except: raise TMParseError()
 
    def _encode_data(self, error_code):
       return '{:02x}'.format(error_code).upper()

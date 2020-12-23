@@ -4,7 +4,6 @@ import asyncio
 from matplotlib.cbook import flatten
 
 from stateful_client import StatefulClient
-from techman_client import TechmanException
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -12,9 +11,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from packets.packets import *
-
-class TMSCTException(TechmanException):
-   pass
+from util.exceptions import * # pylint: disable=no-name-in-module
 
 class TMSCT_client(StatefulClient):
 

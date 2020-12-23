@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import asyncio, asyncio.futures as futures
+import asyncio
 
-from techman_client import TechmanException, TechmanClient
+from techman_client import TechmanClient, TechmanConnection
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -10,31 +10,32 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from packets.packets import *
+from util.exceptions import * # pylint: disable=no-name-in-module
 
 class StatelessClient(TechmanClient):
 
-   async def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip, robot_port):
-      await super(StatelessClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
-      self._request_callback = None
+   def _on_connection(self, reader, writer):
+      return StatelessConnection(reader, writer, self._conn_timeout, self._suppress_warn)
 
-   async def send(self, techman_packet):
+class StatelessConnection(TechmanConnection):
+
+   async def send(self, packet):
       try:
-         # Check connection
-         if not self.is_connected and not await self._connect_async(): raise TechmanException('Could not connect to robot.')
          # Send packet
-         self._writer.write(techman_packet.encoded())
+         self._writer.write(packet.encoded())
+         await self._writer.drain()
          # Wait for response
-         read_fut = self._reader.read(100000)
-         read_bytes = await asyncio.wait_for(read_fut, timeout=self._conn_timeout)
+         read_bytes = await asyncio.wait_for(self._reader.read(100000), timeout=self._conn_timeout)
          # Empty byte indicates lost connection
-         if read_bytes == b'': raise TechmanException('Socket connection was claimed by another client')
-         res = StatelessPacket(read_bytes)
+         if read_bytes == b'': raise TMConnectError(None, msg='Socket connection was claimed by another client')
          # Validate response
-         if res._header == 'CPERR': raise TechmanException(CPERR_packet(res).description)
+         res = StatelessPacket(read_bytes)
+         if res._header == 'CPERR': raise TMProtocolError(CPERR_packet(res).description)
          else: return res
       except TechmanException as e: raise e
-      except asyncio.TimeoutError: raise TechmanException('Could not connect to robot.') from None
+      except asyncio.TimeoutError: raise TMConnectError(None, msg='Did not receive a message from server') from None
+      except ConnectionError as e: raise TMConnectError(e)
       except RuntimeError as e:
-         if 'coroutine' in str(e): raise TechmanException('Only one stateless outgoing request can be active at any time!') from None
-         else: raise e
-      except Exception as e: raise TechmanException(str(e) + ' (' + type(e).__name__ + ')')
+         if 'coroutine' in str(e): raise TMConnectError(None, msg='Only one stateless outgoing request can be active at any time!') from None
+         else: raise TechmanException()
+      except Exception as e: raise TechmanException()

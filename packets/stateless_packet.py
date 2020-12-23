@@ -2,15 +2,24 @@
 
 import sys
 
+# Import 'util' folder
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+if parentdir not in sys.path: sys.path.insert(0, parentdir)
+from util.exceptions import * # pylint: disable=no-name-in-module
+
 class StatelessPacket:
 
    def __init__(self, *args):
-      self._header, self._data = None, None
-      if len(args) == 1:
-         self._header, self._data = self._decode(args[0])
-      elif len(args) == 2:
-         self._header = args[0]
-         self._data = args[1]
+      try:
+         self._header, self._data = None, None
+         if len(args) == 1:
+            self._header, self._data = self._decode(args[0])
+         elif len(args) == 2:
+            self._header = args[0]
+            self._data = args[1]
+      except: raise TMParseError()
 
    def _encode(self, header, data):
       checksum_data = '%s,%d,%s,' % (header, len(data), data)
