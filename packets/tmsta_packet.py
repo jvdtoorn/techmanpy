@@ -64,10 +64,3 @@ class TMSTA_packet(StatelessPacket):
 
    @property
    def params(self): return self._decode_data(self._data)[1]
-
-
-if __name__ == "__main__":
-   msg = TMSTA_packet(TMSTA_type.QUEUE_TAG, [None])
-   print(msg.encoded())
-   print(msg.ptype)
-   print(msg.params)

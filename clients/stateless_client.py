@@ -13,8 +13,8 @@ from packets.packets import *
 
 class StatelessClient(TechmanClient):
 
-   def __init__(self, *, robot_ip, robot_port):
-      super(StatelessClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port)
+   def __init__(self, suppress_warn=False, conn_timeout=None, *, robot_ip, robot_port):
+      super(StatelessClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._request_callback = None
 
    def send(self, techman_packet): return self._loop.run_until_complete(self._send(techman_packet))
@@ -26,7 +26,7 @@ class StatelessClient(TechmanClient):
          self._writer.write(techman_packet.encoded())
          # Wait for response
          read_bytes = await self._reader.read(100000)
-         res = TechmanPacket(read_bytes)
+         res = StatelessPacket(read_bytes)
          # Validate response
          if res._header == 'CPERR': raise TechmanException(CPERR_packet(res).description)
          else: return res
@@ -36,17 +36,3 @@ class StatelessClient(TechmanClient):
    def __del__(self):
       if hasattr(self, '_writer'):
          self._writer.close()
-
-if __name__ == "__main__":
-
-   clnt = StatelessClient(robot_ip='localhost', robot_port=5890)
-   try:
-      res = clnt.send(TMSTA_packet(TMSTA_type.QUEUE_TAG, [2]))
-      print(res.encoded())
-   except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-
-   clnt._robot_ip='10.66.0.117'
-   try:
-      res = clnt.send(TMSTA_packet(TMSTA_type.QUEUE_TAG, [2]))
-      print(res.encoded())
-   except TechmanException as e: print(type(e).__name__ + ': ' + str(e))

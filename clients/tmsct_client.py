@@ -3,7 +3,8 @@
 import asyncio
 from matplotlib.cbook import flatten
 
-from techman_client import TechmanException, TechmanClient
+from stateful_client import StatefulClient
+from techman_client import TechmanException
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -15,28 +16,26 @@ from packets.packets import *
 class TMSCTException(TechmanException):
    pass
 
-class TMSCT_client(TechmanClient):
+class TMSCT_client(StatefulClient):
 
    # Durations are in milliseconds
    # Sizes are in millimeters
    # Angles are in degrees
    # Percentages are a float between 0.0 and 1.0
 
-   # TODO: Add support for return values
-
    PORT=5890
 
-   def __init__(self, *, robot_ip, id):
-      super(TMSCT_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT)
+   def __init__(self, suppress_warn=False, conn_timeout=None, id='SCTpy', *, robot_ip):
+      super(TMSCT_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._id = str(id)
-      self.g_cnt = 0
+      self.command_cnt = 0
       self._in_transaction = False
       self._transaction = []
 
    def _execute_commands(self, commands):
       # Build TMSCT packet
-      handle_id = '%s%d' % (self._id, self.g_cnt)
-      self.g_cnt += 1
+      handle_id = '%s%d' % (self._id, self.command_cnt)
+      self.command_cnt += 1
       req = TMSCT_packet(handle_id, TMSCT_type.REQUEST, commands)
       # Submit
       res = TMSCT_packet(self.send(req))
@@ -44,12 +43,13 @@ class TMSCT_client(TechmanClient):
       assert res.handle_id == handle_id
       assert res.ptype == TMSCT_type.RESPONSE
       if len(res.lines) > 0:
-         commands = [req.commands[i] for i in res.lines]
+         commands = [req.commands[i-1] for i in res.lines]
          enc_cmnds = list(map(req._encode_command, commands))
          if res.status == TMSCT_status.SUCCESS:
-            if len(res.lines) == 1:
-               print('[TMSCT_client] WARN: The command \'%s\' resulted in a warning' % enc_cmnds[0])
-            else: print('[TMSCT_client] WARN: The following commands resulted in a warning: %s' % enc_cmnds)
+            if not self._suppress_warn:
+               if len(res.lines) == 1:
+                  print('[TMSCT_client] WARN: The command \'%s\' resulted in a warning' % enc_cmnds[0])
+               elif len(res.lines) > 1: print('[TMSCT_client] WARN: The following commands resulted in a warning: %s' % enc_cmnds)
          if res.status == TMSCT_status.ERROR:
             if len(res.lines) == 1: raise TMSCTException('The command \'%s\' resulted in an error' % enc_cmnds[0])
             else: raise TMSCTException('The following commands resulted in an error: %s' % enc_cmnds)
@@ -202,9 +202,3 @@ class TMSCT_client(TechmanClient):
       if len(tcp_point_1) != 6 or len(tcp_point_2) != 6: raise TMSCTException('Position array should have exactly 6 elements')
       speed = int(speed if speed_is_velocity else (100 * speed))
       return self._execute_command(('Circle', ['CAP' if speed_is_velocity else 'CPP', tcp_point_1, tcp_point_2, speed, int(acceleration_duration), int(100 * blending_perc), arc_angle, not use_precise_positioning]))
-
-
-if __name__ == "__main__":
-   clnt = TMSCT_client(robot_ip='10.66.0.117', id='DC')
-   try: clnt.set_load_weight(0.5)
-   except TechmanException as e: print(type(e).__name__ + ': ' + str(e))

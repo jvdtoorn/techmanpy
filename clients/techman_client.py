@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
 import asyncio
-import threading
-import time
-from threading import Event
-from kthread import KThread
-import socket
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -19,18 +14,21 @@ class TechmanException(Exception):
 
 class TechmanClient:
 
-   def __init__(self, *, robot_ip, robot_port):
+   def __init__(self, suppress_warn=False, conn_timeout=None, *, robot_ip, robot_port):
+      self._conn_timeout = 3 if conn_timeout is None else conn_timeout
+      self._suppress_warn = suppress_warn
       self._robot_ip = robot_ip
       self._robot_port = robot_port
       self._conn_exception = None
       self._loop = asyncio.get_event_loop()
       if not self._connect():
-         print('[TechmanClient] WARN: Could not connect to robot during initialisation.')
+         if not self._suppress_warn: print('[TechmanClient] WARN: Could not connect to robot during initialisation.')
 
    def _connect(self): return self._loop.run_until_complete(self._connect_async())
    async def _connect_async(self):
+      connect_fut = asyncio.open_connection(self._robot_ip, self._robot_port)
       try: 
-         self._reader, self._writer = await asyncio.open_connection(self._robot_ip, self._robot_port)
+         self._reader, self._writer = await asyncio.wait_for(connect_fut, timeout=self._conn_timeout)
       except Exception as e:
          self._conn_exception = e
          return False

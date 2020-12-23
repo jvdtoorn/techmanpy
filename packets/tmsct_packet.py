@@ -87,16 +87,3 @@ class TMSCT_packet(StatefulPacket):
 
    @property
    def lines(self): return self._decode_data(self._data)[2]
-
-
-if __name__ == "__main__":
-   msg = TMSCT_packet(3, TMSCT_type.REQUEST, [('ChangeBase', ['RobotBase']), ('ChangeLoad', [10.1]), (TMSCT_command_type.VARIABLE, 'var_i = 1000'), ('PTP', [[10, 10, 20, 30, 5]]), ('PTP', [10.123, [10, True, 30], None])])
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.commands)
-
-   msg = TMSCT_packet(3, TMSCT_type.RESPONSE, TMSCT_status.ERROR, [5])
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.status)
-   print(msg.lines)

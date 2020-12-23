@@ -2,7 +2,8 @@
 
 import asyncio
 
-from techman_client import TechmanException, TechmanClient
+from stateless_client import StatelessClient
+from techman_client import TechmanException
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -14,12 +15,12 @@ from packets.packets import *
 class TMSTAException(TechmanException):
    pass
 
-class TMSTA_client(TechmanClient):
+class TMSTA_client(StatelessClient):
 
    PORT=5890
 
-   def __init__(self, *, robot_ip):
-      super(TMSTA_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT)
+   def __init__(self, suppress_warn=False, conn_timeout=None, *, robot_ip):
+      super(TMSTA_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
 
    def is_listen_node_active(self):
       # Build TMSTA packet
@@ -38,10 +39,3 @@ class TMSTA_client(TechmanClient):
       # Parse response
       assert res.ptype == TMSTA_type.QUEUE_TAG
       return res.params[1]
-
-
-if __name__ == "__main__":
-   clnt = TMSTA_client(robot_ip='10.66.0.117')
-   try: status = clnt.is_listen_node_active()
-   except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-   print(f'Status: {status}')

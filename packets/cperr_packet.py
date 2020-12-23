@@ -48,10 +48,3 @@ class CPERR_packet(StatelessPacket):
 
    @property
    def description(self): return CPERR_code.description(self.value)
-
-
-if __name__ == "__main__":
-   error = CPERR_packet(CPERR_code.NO_LISTEN)
-   print(error.encoded())
-   print(error.value)
-   print(error.description)

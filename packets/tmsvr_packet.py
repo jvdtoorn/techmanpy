@@ -128,37 +128,3 @@ class TMSVR_packet(StatefulPacket):
 
    @property
    def items(self): return self._decode_data(self._data)[1]
-
-
-if __name__ == "__main__":
-   msg = TMSVR_packet('S1', TMSVR_type.RESPONSE_STATUS, TMSVR_status.FORMAT_ERROR, None)
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.ptype)
-   print(msg.status)
-   print(msg.errdata)
-
-   msg = TMSVR_packet('S5', TMSVR_type.RESPONSE_STATUS, TMSVR_status.WRITE_PROTECTED, 'Robot_Link')
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.ptype)
-   print(msg.status)
-   print(msg.errdata)
-
-   msg = TMSVR_packet('S4', TMSVR_type.VALUE_DATA, {'Ctrl_DO32': 1})
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.ptype)
-   print(msg.items)
-
-   msg = TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link', 'TCP_Mass'})
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.ptype)
-   print(msg.items)
-
-   msg = TMSVR_packet('S7', TMSVR_type.VALUE_DATA, {'adata': [1, 2, 3]})
-   print(msg.encoded())
-   print(msg.handle_id)
-   print(msg.ptype)
-   print(msg.items)

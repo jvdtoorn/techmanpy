@@ -13,8 +13,8 @@ from packets.packets import *
 
 class StatefulClient(TechmanClient):
 
-   def __init__(self, broadcast_callback=None, *, robot_ip, robot_port):
-      super(StatefulClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port)
+   def __init__(self, suppress_warn=False, broadcast_callback=None, conn_timeout=None, *, robot_ip, robot_port):
+      super(StatefulClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._broadcast_callback = broadcast_callback
       self._in_listen = False
       self._reconnect_cnt = 0
@@ -69,10 +69,9 @@ class StatefulClient(TechmanClient):
          if not self.is_connected and not await self._connect_async():
             if self._broadcast_callback is None: self._on_exception(self._conn_exception); break
             else:
-               print('[StatefulClient] Broadcast server not connected, will try again in 3 seconds...')
+               if not self._suppress_warn: print('[StatefulClient] WARN: Broadcast server not connected, will try again in 3 seconds...')
                await asyncio.sleep(3)
                continue
-         # raise Exception('test')
          read_bytes = await self._reader.read(100000)
          # Ignore broken message (empty, or doesn't start with '$' or doesn't end with checksum)
          if read_bytes == b'':
@@ -103,89 +102,3 @@ class StatefulClient(TechmanClient):
    def __del__(self):
       if hasattr(self, '_writer'):
          self._writer.close()
-
-
-if __name__ == "__main__":
-   def broadcast_callback(res):
-         if isinstance(res, TechmanException): print('BC: ' + type(res).__name__ + ': ' + str(res))
-         else: print('BC: ' + str(len(res.encoded())))
-
-   def callback(res):
-      if isinstance(res, TechmanException): print('CB: ' + type(res).__name__ + ': ' + str(res))
-      else: print('CB: ' + str(res.encoded()))
-
-   if False:
-      clnt = StatefulClient(robot_ip='localhost', robot_port=5891)
-      clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q3', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q4', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q5', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      exit()
-
-   if True:
-      clnt = StatefulClient(robot_ip='10.66.0.117', robot_port=5891, broadcast_callback=broadcast_callback)
-      clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q3', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q4', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q5', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q6', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q7', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q8', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q9', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q10', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q11', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q12', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      clnt.send(TMSVR_packet('Q13', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}), callback=callback)
-      asyncio.get_event_loop().run_forever()
-      print('hi')
-      exit()
-
-   # Test
-   if False:
-      clnt = StatefulClient(robot_ip='localhost', robot_port=5891)
-      input()
-      try:
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-      except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-      exit()
-
-   # Test
-   if False:
-      clnt = StatefulClient(robot_ip='localhost', robot_port=5891)
-      try:
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-      except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-      exit()
-
-   # Test
-   if True:
-      clnt = StatefulClient(robot_ip='10.66.0.117', robot_port=5891, broadcast_callback=broadcast_callback)
-      try:
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-      except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-      exit()
-
-   # Test
-   if False:
-      clnt = StatefulClient(robot_ip='localhost', robot_port=5891)
-      try:
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-      except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-      clnt._robot_ip = '10.66.0.117'
-      try:
-         res = clnt.send(TMSVR_packet('Q2', TMSVR_type.VALUE_REQUEST, {'Robot_Link'}))
-         print(res.encoded())
-      except TechmanException as e: print(type(e).__name__ + ': ' + str(e))
-      exit()
