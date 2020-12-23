@@ -87,7 +87,7 @@ class StatefulClient(TechmanClient):
          self._reconnect_cnt = 0
          res = StatefulPacket(read_bytes)
          if res._header == 'CPERR':
-            self._handle_exception(TechmanException(CPERR_packet(read_bytes).description))
+            self._on_exception(TechmanException(CPERR_packet(read_bytes).description))
             break
          self._on_message(res)
          # Refresh request if no answer within 5 packets
