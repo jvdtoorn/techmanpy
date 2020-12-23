@@ -14,8 +14,8 @@ class TechmanException(Exception):
 
 class TechmanClient:
 
-   def __init__(self, suppress_warn=False, conn_timeout=None, *, robot_ip, robot_port):
-      self._conn_timeout = 3 if conn_timeout is None else conn_timeout
+   def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip, robot_port):
+      self._conn_timeout = conn_timeout
       self._suppress_warn = suppress_warn
       self._robot_ip = robot_ip
       self._robot_port = robot_port

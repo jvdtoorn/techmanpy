@@ -13,7 +13,7 @@ from packets.packets import *
 
 class StatelessClient(TechmanClient):
 
-   def __init__(self, suppress_warn=False, conn_timeout=None, *, robot_ip, robot_port):
+   def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip, robot_port):
       super(StatelessClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._request_callback = None
 

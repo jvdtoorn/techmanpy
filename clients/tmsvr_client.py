@@ -19,7 +19,7 @@ class TMSVR_client(StatefulClient):
 
    PORT=5891
 
-   def __init__(self, suppress_warn=False, conn_timeout=None, id='SCTpy', broadcast_callback=None, *, robot_ip):
+   def __init__(self, suppress_warn=False, conn_timeout=3, id='SVRpy', broadcast_callback=None, *, robot_ip):
       if broadcast_callback is not None:
          callback = broadcast_callback
          def parsed_callback(res):
@@ -29,6 +29,8 @@ class TMSVR_client(StatefulClient):
       super(TMSVR_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, broadcast_callback=broadcast_callback, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._id = str(id)
       self._msg_cnt = 0
+
+   def keep_alive(self): asyncio.get_event_loop().run_forever()
 
    def _execute(self, packet):
       # Submit

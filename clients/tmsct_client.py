@@ -18,14 +18,15 @@ class TMSCTException(TechmanException):
 
 class TMSCT_client(StatefulClient):
 
-   # Durations are in milliseconds
-   # Sizes are in millimeters
-   # Angles are in degrees
-   # Percentages are a float between 0.0 and 1.0
+   # NOTE:
+   # - Durations are in milliseconds
+   # - Sizes are in millimeters
+   # - Angles are in degrees
+   # - Percentages are between 0.0 and 1.0
 
    PORT=5890
 
-   def __init__(self, suppress_warn=False, conn_timeout=None, id='SCTpy', *, robot_ip):
+   def __init__(self, suppress_warn=False, conn_timeout=3, id='SCTpy', *, robot_ip):
       super(TMSCT_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._id = str(id)
       self.command_cnt = 0

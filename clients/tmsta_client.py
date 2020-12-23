@@ -19,7 +19,7 @@ class TMSTA_client(StatelessClient):
 
    PORT=5890
 
-   def __init__(self, suppress_warn=False, conn_timeout=None, *, robot_ip):
+   def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip):
       super(TMSTA_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
 
    def is_listen_node_active(self):

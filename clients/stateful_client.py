@@ -13,7 +13,7 @@ from packets.packets import *
 
 class StatefulClient(TechmanClient):
 
-   def __init__(self, suppress_warn=False, broadcast_callback=None, conn_timeout=None, *, robot_ip, robot_port):
+   def __init__(self, suppress_warn=False, broadcast_callback=None, conn_timeout=3, *, robot_ip, robot_port):
       super(StatefulClient, self).__init__(robot_ip=robot_ip, robot_port=robot_port, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._broadcast_callback = broadcast_callback
       self._in_listen = False
