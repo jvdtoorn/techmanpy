@@ -19,14 +19,14 @@ class TMSVR_client(StatefulClient):
 
    PORT=5891
 
-   def __init__(self, suppress_warn=False, conn_timeout=3, id='SVRpy', broadcast_callback=None, *, robot_ip):
+   async def __init__(self, suppress_warn=False, conn_timeout=3, id='SVRpy', broadcast_callback=None, *, robot_ip):
       if broadcast_callback is not None:
          callback = broadcast_callback
          def parsed_callback(res):
             if isinstance(res, Exception): callback(res)
             else: callback(TMSVR_packet(res))
          broadcast_callback = parsed_callback
-      super(TMSVR_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, broadcast_callback=broadcast_callback, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
+      await super(TMSVR_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, broadcast_callback=broadcast_callback, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._id = str(id)
       self._msg_cnt = 0
 

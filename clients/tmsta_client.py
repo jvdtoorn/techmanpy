@@ -19,23 +19,23 @@ class TMSTA_client(StatelessClient):
 
    PORT=5890
 
-   def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip):
-      super(TMSTA_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
+   async def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip):
+      await super(TMSTA_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
 
-   def is_listen_node_active(self):
+   async def is_listen_node_active(self):
       # Build TMSTA packet
       req = TMSTA_packet(TMSTA_type.IN_LISTEN_MODE, None)
       # Submit
-      res = TMSTA_packet(self.send(req))
+      res = TMSTA_packet(await self.send(req))
       # Parse response
       assert res.ptype == TMSTA_type.IN_LISTEN_MODE
       return res.params[0]
 
-   def get_queue_tag_status(self, tag_id):
+   async def get_queue_tag_status(self, tag_id):
       # Build TMSTA packet
       req = TMSTA_packet(TMSTA_type.QUEUE_TAG, [tag_id])
       # Submit
-      res = TMSTA_packet(self.send(req))
+      res = TMSTA_packet(await self.send(req))
       # Parse response
       assert res.ptype == TMSTA_type.QUEUE_TAG
       return res.params[1]

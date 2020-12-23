@@ -3,6 +3,8 @@
 .catkin_workspace
 .catkin_tools/
 __pycache__/
+test/
+TODO
 
 # General ignores
 *.com

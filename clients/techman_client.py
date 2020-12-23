@@ -12,23 +12,31 @@ from packets.packets import *
 class TechmanException(Exception):
    pass
 
-class TechmanClient:
+class TechmanClient(object):
 
-   def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip, robot_port):
+   # Allow async object creation
+   async def __new__(cls, *a, **kw):
+      instance = super().__new__(cls)
+      await instance.__init__(*a, **kw) # pylint: disable=missing-kwoa
+      return instance
+
+   async def __init__(self, suppress_warn=False, conn_timeout=3, *, robot_ip, robot_port):
       self._conn_timeout = conn_timeout
       self._suppress_warn = suppress_warn
       self._robot_ip = robot_ip
       self._robot_port = robot_port
       self._conn_exception = None
       self._loop = asyncio.get_event_loop()
-      if not self._connect():
+      if not await self._connect_async():
          if not self._suppress_warn: print('[TechmanClient] WARN: Could not connect to robot during initialisation.')
 
-   def _connect(self): return self._loop.run_until_complete(self._connect_async())
    async def _connect_async(self):
       connect_fut = asyncio.open_connection(self._robot_ip, self._robot_port)
       try: 
          self._reader, self._writer = await asyncio.wait_for(connect_fut, timeout=self._conn_timeout)
+      except RuntimeError as e:
+         if 'coroutine' in str(e): raise TechmanException('Only one client creation can be active at any time!') from None
+         else: raise e
       except Exception as e:
          self._conn_exception = e
          return False
@@ -37,3 +45,11 @@ class TechmanClient:
 
    @property
    def is_connected(self): return self._conn_exception is None
+
+   def __del__(self):
+      try:
+         # If event loop is still open, close the socket reader and writer
+         asyncio.get_event_loop()
+         if hasattr(self, '_reader'): self._reader.close()
+         if hasattr(self, '_writer'): self._writer.close()
+      except: pass

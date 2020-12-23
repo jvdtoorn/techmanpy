@@ -10,7 +10,7 @@ parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from clients.clients import *
 
-if __name__ == "__main__":
+if __name__ == '__main__':
    if len(sys.argv) == 2: ROBOT_IP = sys.argv[1]
    else: print('Don\'t forget to specify the IP address of your robot!'); exit()
    while True:
