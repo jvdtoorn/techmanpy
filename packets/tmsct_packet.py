@@ -53,7 +53,7 @@ class TMSCT_packet(StatefulPacket):
          return encoded + commands
       if ptype == TMSCT_type.RESPONSE:
          if len(args[3]) == 0: return encoded + args[2]
-         return encoded + '%s;%s' % (args[2], ';'.join(list(map(str, args[3]))))
+         return encoded + f'{args[2]};{";".join(list(map(str, args[3])))}'
 
    def _decode_data(self, data):
       payload = data[data.find(',')+1:]
@@ -75,7 +75,7 @@ class TMSCT_packet(StatefulPacket):
       argstr = str(arglist).replace(' ', '').replace('[', '{').replace(']', '}')
       argstr = argstr.replace('True', 'true').replace('False', 'false').replace('None', 'none')
       argstr = argstr.replace('\'', '"')
-      return '%s(%s)' % (name, argstr[1:-1])
+      return f'{name}({argstr[1:-1]})'
 
    def _decode_command(self, command):
       if '(' not in command: return TMSCT_command_type.VARIABLE, command

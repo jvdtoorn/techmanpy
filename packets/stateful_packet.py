@@ -18,7 +18,7 @@ class StatefulPacket(StatelessPacket):
       except: raise TMParseError()
 
    def _encode_data(self, handle_id):
-      return '%s,' % str(handle_id)
+      return f'{handle_id},'
 
    @property
    def handle_id(self):

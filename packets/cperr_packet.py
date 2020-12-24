@@ -47,7 +47,7 @@ class CPERR_packet(StatelessPacket):
       except: raise TMParseError()
 
    def _encode_data(self, error_code):
-      return '{:02x}'.format(error_code).upper()
+      return f'{error_code:02X}'
 
    def _decode_data(self, data):
       return int(data, 16)

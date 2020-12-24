@@ -74,19 +74,19 @@ class TMSVR_packet(StatefulPacket):
    def _encode_data(self, *args):
       encoded = super()._encode_data(args[0])
       ptype = args[1]
-      encoded += '%s,' % ptype
+      encoded += f'{ptype},'
       if ptype == TMSVR_type.VALUE_REQUEST:
          for variable in args[2]:
-            encoded += '%s\r\n' % variable
+            encoded += f'{variable}\r\n'
          encoded = encoded[:len(encoded)-2]
       elif ptype == TMSVR_type.VALUE_DATA:
          for variable, value in args[2].items():
-            encoded += '%s=%s\r\n' % (variable, self._encode_value(value))
+            encoded += f'{variable}={self._encode_value(value)}\r\n'
          encoded = encoded[:len(encoded)-2]
       elif ptype == TMSVR_type.RESPONSE_STATUS:
-         encoded += '%s,' % '{:02x}'.format(args[2][0]).upper()
+         encoded += f'{args[2][0]:02X},'
          if len(args) == 3: encoded += args[2][1]
-         else: encoded += '%s;%s' % (args[2][1], args[3])
+         else: encoded += f'{args[2][1]};{args[3]}'
       return encoded
 
    def _decode_data(self, data):
@@ -109,7 +109,7 @@ class TMSVR_packet(StatefulPacket):
          return ptype, status, errdata
 
    def _encode_value(self, value):
-      if isinstance(value, str): return '"%s"' % value
+      if isinstance(value, str): return f'"{value}"'
       if isinstance(value, list):
          return str(value).replace(' ', '').replace('[', '{').replace(']', '}')
       if isinstance(value, bool) and value == True: return 'true'

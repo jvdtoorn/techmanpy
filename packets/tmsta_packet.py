@@ -35,9 +35,9 @@ class TMSTA_packet(StatelessPacket):
 
    def _encode_data(self, ptype, params):
       if isinstance(ptype, int): ptype = self._encode_int(ptype)
-      if params is None: return '%s' % ptype
+      if params is None: return f'{ptype}'
       params = ','.join(list(map(self._encode_param, params)))
-      return '%s,%s' % (ptype, params)
+      return f'{ptype},{params}'
 
    def _decode_data(self, data):
       if ',' not in data: return self._decode_int(data), None

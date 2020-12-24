@@ -22,11 +22,11 @@ class StatelessPacket:
       except: raise TMParseError()
 
    def _encode(self, header, data):
-      checksum_data = '%s,%d,%s,' % (header, len(data), data)
+      checksum_data = f'{header},{len(data)},{data},'
       checksum = 0b0
       utf_str = checksum_data.encode('utf-8')
       for byte in utf_str: checksum ^= byte
-      return '$%s*%s\r\n' % (checksum_data, '{:02x}'.format(checksum).upper())
+      return f'${checksum_data}*{checksum:02X}\r\n'
 
    def _decode(self, packet):
       if isinstance(packet, bytes): packet = packet.decode('utf-8')

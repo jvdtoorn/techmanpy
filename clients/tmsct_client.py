@@ -133,7 +133,7 @@ class TMSCT_commands:
    def move_to_point_line(self, tcp_point_goal, speed, acceleration_duration, blending, speed_is_velocity=False, blending_is_radius=False, use_precise_positioning=False):
       if (not speed_is_velocity and speed > 1.0) or (not blending_is_radius and blending > 1.0): raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(tcp_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
-      data_mode = 'C%s%s' % ('A' if speed_is_velocity else 'P', 'R' if blending_is_radius else 'P')
+      data_mode = f'C{"A" if speed_is_velocity else "P"}{"R" if blending_is_radius else "P"}'
       speed = int(speed if speed_is_velocity else (100 * speed))
       blending = int(blending if blending_is_radius else (100 * blending))
       return ('Line', [data_mode, tcp_point_goal, speed, int(acceleration_duration), blending, not use_precise_positioning])
@@ -141,7 +141,7 @@ class TMSCT_commands:
    def move_to_relative_point_line(self, relative_point_goal, speed, acceleration_duration, blending, relative_to_tcp=False, speed_is_velocity=False, blending_is_radius=False, use_precise_positioning=False):
       if (not speed_is_velocity and speed > 1.0) or (not blending_is_radius and blending > 1.0): raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(relative_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
-      data_mode = '%s%s%s' % ('T' if relative_to_tcp else 'C', 'A' if speed_is_velocity else 'P', 'R' if blending_is_radius else 'P')
+      data_mode = f'{"T" if relative_to_tcp else "C"}{"A" if speed_is_velocity else "P"}{"R" if blending_is_radius else "P"}'
       speed = int(speed if speed_is_velocity else (100 * speed))
       blending = int(blending if blending_is_radius else (100 * blending))
       return ('Move_Line', [data_mode, relative_point_goal, speed, int(acceleration_duration), blending, not use_precise_positioning])
@@ -191,11 +191,11 @@ class TMSCT_connection(StatefulConnection, TMSCT_commands):
          if res.status == TMSCT_status.SUCCESS:
             if not self._suppress_warns:
                if len(res.lines) == 1:
-                  print('[TMSCT_client] WARN: The command \'%s\' resulted in a warning' % enc_cmnds[0])
-               elif len(res.lines) > 1: print('[TMSCT_client] WARN: The following commands resulted in a warning: %s' % enc_cmnds)
+                  print(f'[TMSCT_client] WARN: The command \'{enc_cmnds[0]}\' resulted in a warning')
+               elif len(res.lines) > 1: print(f'[TMSCT_client] WARN: The following commands resulted in a warning: {enc_cmnds}')
          if res.status == TMSCT_status.ERROR:
-            if len(res.lines) == 1: raise TMSCTError('The command \'%s\' resulted in an error' % enc_cmnds[0])
-            else: raise TMSCTError('The following commands resulted in an error: %s' % enc_cmnds)
+            if len(res.lines) == 1: raise TMSCTError(f'The command \'{enc_cmnds[0]}\' resulted in an error')
+            else: raise TMSCTError(f'The following commands resulted in an error: {enc_cmnds}')
 
    def _unfold_command(self, command):
       return (command[0], list(flatten(command[1])))
