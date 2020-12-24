@@ -44,7 +44,8 @@ class TMSVR_connection(StatefulConnection):
       return await self._execute(req)
 
    async def get_value(self, key):
-      return (await self.get_values({key}))[key]
+      try: return (await self.get_values({key}))[key]
+      except KeyError: raise TMSVRError(f'Response did not contain value \'{key}\'')
 
    async def set_values(self, items):
       req = TMSVR_packet(self._obtain_handle_id(), TMSVR_type.VALUE_DATA, items)

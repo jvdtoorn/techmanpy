@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
+import asyncio
 import time
-import sys
 
 # Import library
 import os, sys, inspect
@@ -9,42 +9,48 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 if parentdir not in sys.path: sys.path.insert(0, parentdir)
 from clients.clients import *
+from util.exceptions import *
 
-if __name__ == '__main__':
-   if len(sys.argv) == 2: ROBOT_IP = sys.argv[1]
-   else: print('Don\'t forget to specify the IP address of your robot!'); exit()
+async def test_connection(robot_ip):
    while True:
       start = time.time()
-      sct_connected, svr_connected, sta_connected = True, True, True
-
-      # Check SCT connection (only active when inside listen node)
-      try:
-         client = TMSCT_client(robot_ip=ROBOT_IP, suppress_warn=True, conn_timeout=1)
-         if not client.is_connected: raise TechmanException()
-         client.resume_project()
-      except TechmanException: sct_connected = False
+      status = {'SCT': 'offline', 'SVR': 'offline', 'STA': 'offline'}
 
       # Check SVR connection (should be always active)
       try:
-         client = TMSVR_client(robot_ip=ROBOT_IP, suppress_warn=True, conn_timeout=1)
-         if not client.is_connected: raise TechmanException()
-         client.get_value('Robot_Model')
-      except TechmanException: svr_connected = False
+         async with TMSVR_client(robot_ip=robot_ip, conn_timeout=1) as conn:
+            status['SVR'] = 'online'
+            await conn.get_value('Robot_Model')
+            status['SVR'] = 'connected'
+      except TechmanException: pass
+
+      # Check SCT connection (only active when inside listen node)
+      try:
+         async with TMSCT_client(robot_ip=robot_ip, conn_timeout=1) as conn:
+            status['SCT'] = 'online'
+            await conn.resume_project()
+            status['SCT'] = 'connected'
+      except TechmanException: pass
 
       # Check STA connection (only active when running project)
       try:
-         client = TMSTA_client(robot_ip=ROBOT_IP, suppress_warn=True, conn_timeout=1)
-         if not client.is_connected: raise TechmanException()
-         client.is_listen_node_active()
-      except TechmanException: sta_connected = False
+         async with TMSTA_client(robot_ip=robot_ip, conn_timeout=1) as conn:
+            status['STA'] = 'online'
+            await conn.is_listen_node_active()
+            status['STA'] = 'connected'
+      except TechmanException: pass
 
       # Print status
-      online, offline = [], []
-      online.append('SCT') if sct_connected else offline.append('SCT')
-      online.append('SVR') if svr_connected else offline.append('SVR')
-      online.append('STA') if sta_connected else offline.append('STA')
-      print(f'online protocols: {online}, offline protocols: {offline}')
+      def colored(status):
+         if status == 'online': return f'\033[96m{status}\033[00m'
+         if status == 'connected': return f'\033[92m{status}\033[00m'
+         if status == 'offline': return f'\033[91m{status}\033[00m'
+      print(f'SVR: {colored(status["SVR"])}, SCT: {colored(status["SCT"])}, STA: {colored(status["STA"])}')
 
       # Sleep 2 seconds (at most)
       elapsed = time.time() - start
       if elapsed < 2: time.sleep(2 - elapsed)
+
+if __name__ == '__main__':
+   if len(sys.argv) == 2: asyncio.run(test_connection(sys.argv[1]))
+   else: print(f'usage: {sys.argv[0]} <robot IP address>')
