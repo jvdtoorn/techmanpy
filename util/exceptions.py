@@ -7,7 +7,7 @@ class TechmanException(Exception):
    
    def __init__(self):
       super().__init__()
-      self._msg = traceback.format_exc()
+      self._msg = f'TechmanException trace:\n{traceback.format_exc()}'
 
    def __str__(self): return str(self._msg).strip()
 

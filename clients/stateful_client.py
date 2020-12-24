@@ -33,7 +33,9 @@ class StatefulConnection(TechmanConnection):
       self._client_id = client_id
       self._msg_cnt = 0
 
-   def add_broadcast_callback(self, broadcast_callback): self._broadcast_callback = broadcast_callback
+   def add_broadcast_callback(self, broadcast_callback):
+      if not self._in_listen: self._start_listen()
+      self._broadcast_callback = broadcast_callback
 
    async def keep_alive(self):
       self._listen_is_awaited = True
@@ -105,6 +107,7 @@ class StatefulConnection(TechmanConnection):
             # Quit loop if we are done
             if self._broadcast_callback is None and len(self._requests) == 0: break
          self._in_listen = False
+      except asyncio.futures.CancelledError: pass # close down loop if user interrupts program
       except TechmanException as e: self._handle_exception(e)
       except ConnectionError as e: self._handle_exception(TMConnectError(e))
       except Exception as e: self._handle_exception(TechmanException())
