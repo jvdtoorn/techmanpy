@@ -26,7 +26,7 @@ class TMSTA_packet(StatelessPacket):
                self._header = args[0]._header
                self._data = args[0]._data
             # Instantiated with raw packet data
-            else: super(TMSTA_packet, self).__init__(*args)
+            else: super().__init__(*args)
          # Instantiated with payload data
          elif len(args) == 2:
             self._header = self.HEADER

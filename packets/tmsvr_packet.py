@@ -64,7 +64,7 @@ class TMSVR_packet(StatefulPacket):
                self._header = args[0]._header
                self._data = args[0]._data
             # Instantiated with raw packet data
-            else: super(TMSVR_packet, self).__init__(*args)
+            else: super().__init__(*args)
          # Instantiated with payload data
          else:
             self._header = self.HEADER
@@ -72,7 +72,7 @@ class TMSVR_packet(StatefulPacket):
       except: raise TMParseError()
 
    def _encode_data(self, *args):
-      encoded = super(TMSVR_packet, self)._encode_data(args[0])
+      encoded = super()._encode_data(args[0])
       ptype = args[1]
       encoded += '%s,' % ptype
       if ptype == TMSVR_type.VALUE_REQUEST:

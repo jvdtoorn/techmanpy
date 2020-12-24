@@ -14,7 +14,7 @@ from util.exceptions import * # pylint: disable=no-name-in-module
 class StatefulPacket(StatelessPacket):
 
    def __init__(self, *args):
-      try: super(StatefulPacket, self).__init__(*args)
+      try: super().__init__(*args)
       except: raise TMParseError()
 
    def _encode_data(self, handle_id):

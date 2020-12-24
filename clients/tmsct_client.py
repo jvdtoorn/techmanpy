@@ -24,7 +24,7 @@ class TMSCT_client(StatefulClient):
    PORT=5890
 
    def __init__(self, suppress_warn=False, conn_timeout=3, id='SCTpy', *, robot_ip):
-      super(TMSCT_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
+      super().__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
       self._id = str(id)
       self.command_cnt = 0
       self._in_transaction = False

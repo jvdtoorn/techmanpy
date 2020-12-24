@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import asyncio
+from asyncio.futures import CancelledError
 
 from techman_client import TechmanClient, TechmanConnection
 
@@ -32,6 +33,7 @@ class StatelessConnection(TechmanConnection):
          res = StatelessPacket(read_bytes)
          if res._header == 'CPERR': raise TMProtocolError(CPERR_packet(res).description)
          else: return res
+      except CancelledError as e: raise e # Delegate asyncio exception
       except TechmanException as e: raise e
       except asyncio.TimeoutError: raise TMConnectError(None, msg='Did not receive a message from server') from None
       except ConnectionError as e: raise TMConnectError(e)

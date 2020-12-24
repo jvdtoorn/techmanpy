@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import asyncio
+from asyncio.futures import CancelledError
 
 from techman_client import TechmanClient, TechmanConnection
 
@@ -107,7 +108,7 @@ class StatefulConnection(TechmanConnection):
             # Quit loop if we are done
             if self._broadcast_callback is None and len(self._requests) == 0: break
          self._in_listen = False
-      except asyncio.futures.CancelledError: pass # close down loop if user interrupts program
+      except CancelledError as e: raise e # Delegate asyncio exception
       except TechmanException as e: self._handle_exception(e)
       except ConnectionError as e: self._handle_exception(TMConnectError(e))
       except Exception as e: self._handle_exception(TechmanException())

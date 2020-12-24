@@ -39,7 +39,7 @@ class CPERR_packet(StatelessPacket):
             self._header = args[0]._header
             self._data = args[0]._data
          # Instantiated with raw packet data
-         elif not isinstance(args[0], int): super(CPERR_packet, self).__init__(*args)
+         elif not isinstance(args[0], int): super().__init__(*args)
          # Instantiated with payload data
          else:
             self._header = self.HEADER
