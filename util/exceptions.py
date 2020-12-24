@@ -33,8 +33,14 @@ class TMProtocolError(TechmanException):
       super().__init__()
       self._msg = f'TMProtocolError: {msg}'
 
-class TMSTAError(TMProtocolError): pass
+class TMSTAError(TMProtocolError):
+   ''' Raised at STA protocol related errors '''
+   pass
 
-class TMSVRError(TMProtocolError): pass
+class TMSVRError(TMProtocolError):
+   ''' Raised at SVR protocol related errors '''
+   pass
 
-class TMSCTError(TMProtocolError): pass
+class TMSCTError(TMProtocolError):
+   ''' Raised at SCT protocol related errors '''
+   pass

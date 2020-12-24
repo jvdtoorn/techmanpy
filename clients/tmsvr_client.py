@@ -25,6 +25,10 @@ class TMSVR_client(StatefulClient):
 
 class TMSVR_connection(StatefulConnection):
 
+   def add_broadcast_callback(self, broadcast_callback):
+      def parsed_callback(packet): broadcast_callback(TMSVR_packet(packet).items)
+      super().add_broadcast_callback(parsed_callback)
+
    async def _execute(self, packet):
       # Submit
       res = TMSVR_packet(await self.send(packet))

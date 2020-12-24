@@ -35,5 +35,8 @@ class TechmanConnection:
       self._conn_timeout = conn_timeout
       self._reader = reader
       self._writer = writer
+      self._init_vars()
+   
+   def _init_vars(self): pass
 
    def _close(self): self._writer.close()

@@ -26,12 +26,15 @@ class StatefulConnection(TechmanConnection):
 
    def __init__(self, client_id, reader, writer, conn_timeout):
       super().__init__(reader, writer, conn_timeout)
+      self._client_id = client_id
+
+   def _init_vars(self):
+      super()._init_vars()
       self._listen_task = None
       self._requests = []
       self._in_listen = False
       self._listen_is_awaited = False
       self._broadcast_callback = None
-      self._client_id = client_id
       self._msg_cnt = 0
 
    def add_broadcast_callback(self, broadcast_callback):
