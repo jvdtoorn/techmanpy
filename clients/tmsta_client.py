@@ -16,11 +16,11 @@ class TMSTA_client(StatelessClient):
 
    PORT=5890
 
-   def __init__(self, *, robot_ip, conn_timeout=3, suppress_warn=False):
-      super().__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
+   def __init__(self, *, robot_ip, conn_timeout=3):
+      super().__init__(robot_ip=robot_ip, robot_port=self.PORT, conn_timeout=conn_timeout)
 
    def _on_connection(self, reader, writer):
-      return TMSTA_connection(reader, writer, self._conn_timeout, self._suppress_warn)
+      return TMSTA_connection(reader, writer, self._conn_timeout)
 
 class TMSTA_connection(StatelessConnection):
 

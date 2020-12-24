@@ -2,7 +2,7 @@
 
 import asyncio
 
-from stateful_client import StatefulClient
+from stateful_client import StatefulClient, StatefulConnection
 
 # Import 'packets' folder
 import os, sys, inspect
@@ -16,47 +16,35 @@ class TMSVR_client(StatefulClient):
 
    PORT=5891
 
-   async def __init__(self, suppress_warn=False, conn_timeout=3, id='SVRpy', broadcast_callback=None, *, robot_ip):
-      if broadcast_callback is not None:
-         callback = broadcast_callback
-         def parsed_callback(res):
-            if isinstance(res, Exception): callback(res)
-            else: callback(TMSVR_packet(res))
-         broadcast_callback = parsed_callback
-      await super(TMSVR_client, self).__init__(robot_ip=robot_ip, robot_port=self.PORT, broadcast_callback=broadcast_callback, conn_timeout=conn_timeout, suppress_warn=suppress_warn)
-      self._id = str(id)
-      self._msg_cnt = 0
+   def __init__(self, *, robot_ip, client_id='SVRpy', conn_timeout=3):
+      super().__init__(robot_ip=robot_ip, robot_port=self.PORT, client_id=client_id, conn_timeout=conn_timeout)
+      self._client_id = client_id
 
-   def keep_alive(self): asyncio.get_event_loop().run_forever()
+   def _on_connection(self, reader, writer):
+      return TMSVR_connection(self._client_id, reader, writer, self._conn_timeout)
 
-   def _execute(self, packet):
+class TMSVR_connection(StatefulConnection):
+
+   async def _execute(self, packet):
       # Submit
-      res = TMSVR_packet(self.send(packet))
+      res = TMSVR_packet(await self.send(packet))
       # Parse response
       assert res.handle_id == packet.handle_id
       if res.ptype == TMSVR_type.RESPONSE_STATUS and res.status != TMSVR_status.SUCCESS:
          if res.errdata is None: raise TMSVRException(res.errdesc)
-         else: raise TMSVRException('%s (name: %s)' % (res.errdesc, res.errdata))
+         else: raise TMSVRException(f'{res.errdesc} (name: {res.errdata})')
       return res.items
 
-   def get_values(self, items):
-      # Build TMSVR packet
-      handle_id = '%s%d' % (self._id, self._msg_cnt)
-      self._msg_cnt += 1
-      req = TMSVR_packet(handle_id, TMSVR_type.VALUE_REQUEST, items)
-      # Submit
-      return self._execute(req)
+   async def get_values(self, items):
+      req = TMSVR_packet(self._obtain_handle_id(), TMSVR_type.VALUE_REQUEST, items)
+      return await self._execute(req)
 
-   def get_value(self, key):
-      return self.get_values({key})[key]
+   async def get_value(self, key):
+      return (await self.get_values({key}))[key]
 
-   def set_values(self, items):
-      # Build TMSVR packet
-      handle_id = '%s%d' % (self._id, self._msg_cnt)
-      self._msg_cnt += 1
-      req = TMSVR_packet(handle_id, TMSVR_type.VALUE_DATA, items)
-      # Submit
-      return self._execute(req)
+   async def set_values(self, items):
+      req = TMSVR_packet(self._obtain_handle_id(), TMSVR_type.VALUE_DATA, items)
+      return await self._execute(req)
 
-   def set_value(self, key, value):
-      return self.set_values({key: value})
+   async def set_value(self, key, value):
+      return await self.set_values({key: value})

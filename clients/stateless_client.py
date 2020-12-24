@@ -15,7 +15,7 @@ from util.exceptions import * # pylint: disable=no-name-in-module
 class StatelessClient(TechmanClient):
 
    def _on_connection(self, reader, writer):
-      return StatelessConnection(reader, writer, self._conn_timeout, self._suppress_warn)
+      return StatelessConnection(reader, writer, self._conn_timeout)
 
 class StatelessConnection(TechmanConnection):
 
@@ -27,7 +27,7 @@ class StatelessConnection(TechmanConnection):
          # Wait for response
          read_bytes = await asyncio.wait_for(self._reader.read(100000), timeout=self._conn_timeout)
          # Empty byte indicates lost connection
-         if read_bytes == b'': raise TMConnectError(None, msg='Socket connection was claimed by another client')
+         if read_bytes == b'': raise TMConnectError(None, msg='Socket connection was closed by server')
          # Validate response
          res = StatelessPacket(read_bytes)
          if res._header == 'CPERR': raise TMProtocolError(CPERR_packet(res).description)
