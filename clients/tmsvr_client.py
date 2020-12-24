@@ -35,8 +35,8 @@ class TMSVR_connection(StatefulConnection):
       # Parse response
       assert res.handle_id == packet.handle_id
       if res.ptype == TMSVR_type.RESPONSE_STATUS and res.status != TMSVR_status.SUCCESS:
-         if res.errdata is None: raise TMSVRException(res.errdesc)
-         else: raise TMSVRException(f'{res.errdesc} (name: {res.errdata})')
+         if res.errdata is None: raise TMSVRError(res.errdesc)
+         else: raise TMSVRError(f'{res.errdesc} (\'{res.errdata}\')')
       return res.items
 
    async def get_values(self, items):

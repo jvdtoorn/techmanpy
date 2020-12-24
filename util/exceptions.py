@@ -35,12 +35,21 @@ class TMProtocolError(TechmanException):
 
 class TMSTAError(TMProtocolError):
    ''' Raised at STA protocol related errors '''
-   pass
+   
+   def __init__(self, msg):
+      super().__init__(msg)
+      self._msg = f'TMSTAError: {msg}'
 
 class TMSVRError(TMProtocolError):
    ''' Raised at SVR protocol related errors '''
-   pass
+   
+   def __init__(self, msg):
+      super().__init__(msg)
+      self._msg = f'TMSVRError: {msg}'
 
 class TMSCTError(TMProtocolError):
    ''' Raised at SCT protocol related errors '''
-   pass
+   
+   def __init__(self, msg):
+      super().__init__(msg)
+      self._msg = f'TMSCTError: {msg}'

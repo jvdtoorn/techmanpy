@@ -52,7 +52,7 @@ class TMSCT_packet(StatefulPacket):
          commands = '\r\n'.join(list(map(self._encode_command, args[2])))
          return encoded + commands
       if ptype == TMSCT_type.RESPONSE:
-         if len(args[3]) == 0: return args[2]
+         if len(args[3]) == 0: return encoded + args[2]
          return encoded + '%s;%s' % (args[2], ';'.join(list(map(str, args[3]))))
 
    def _decode_data(self, data):

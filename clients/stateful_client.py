@@ -85,8 +85,9 @@ class StatefulConnection(TechmanConnection):
       def callback(res):
          # For debugging purposes
          try: res.result()
+         except CancelledError as e: pass
          except Exception as e: 
-            if not self._listen_is_awaited: print(f'Exception caught: {e}')
+            if not self._listen_is_awaited: print(f'Exception caught: {type(e)}')
       self._listen_task = asyncio.ensure_future(self._listen())
       self._listen_task.add_done_callback(callback)
 
@@ -100,7 +101,9 @@ class StatefulConnection(TechmanConnection):
             elif len(read_bytes) > 5 and (read_bytes[0] != 0x24 or read_bytes[-5] != 0x2A): continue
             # Valid respone
             res = StatefulPacket(read_bytes)
-            if res._header == 'CPERR': raise TMProtocolError(CPERR_packet(res).description)
+            if res._header == 'CPERR':
+               self._handle_exception(TMProtocolError(CPERR_packet(res).description))
+               continue
             self._on_message(res)
             # Refresh request if no answer within 5 packets
             for request in self._requests:               

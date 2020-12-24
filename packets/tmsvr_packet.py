@@ -85,7 +85,7 @@ class TMSVR_packet(StatefulPacket):
          encoded = encoded[:len(encoded)-2]
       elif ptype == TMSVR_type.RESPONSE_STATUS:
          encoded += '%s,' % '{:02x}'.format(args[2][0]).upper()
-         if args[3] is None: encoded += args[2][1]
+         if len(args) == 3: encoded += args[2][1]
          else: encoded += '%s;%s' % (args[2][1], args[3])
       return encoded
 
