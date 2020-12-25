@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 
+import sys
 import asyncio
 import time
 
-# Import library
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-if parentdir not in sys.path: sys.path.insert(0, parentdir)
-from clients.clients import *
-from util.exceptions import *
+import techmanpy
+from techmanpy import TechmanException
 
 async def test_connection(robot_ip):
    while True:
@@ -18,7 +14,7 @@ async def test_connection(robot_ip):
 
       # Check SVR connection (should be always active)
       try:
-         async with TMSVR_client(robot_ip=robot_ip, conn_timeout=1) as conn:
+         async with techmanpy.connect_svr(robot_ip=robot_ip, conn_timeout=1) as conn:
             status['SVR'] = 'online'
             await conn.get_value('Robot_Model')
             status['SVR'] = 'connected'
@@ -26,7 +22,7 @@ async def test_connection(robot_ip):
 
       # Check SCT connection (only active when inside listen node)
       try:
-         async with TMSCT_client(robot_ip=robot_ip, conn_timeout=1) as conn:
+         async with techmanpy.connect_sct(robot_ip=robot_ip, conn_timeout=1) as conn:
             status['SCT'] = 'online'
             await conn.resume_project()
             status['SCT'] = 'connected'
@@ -34,7 +30,7 @@ async def test_connection(robot_ip):
 
       # Check STA connection (only active when running project)
       try:
-         async with TMSTA_client(robot_ip=robot_ip, conn_timeout=1) as conn:
+         async with techmanpy.connect_sta(robot_ip=robot_ip, conn_timeout=1) as conn:
             status['STA'] = 'online'
             await conn.is_listen_node_active()
             status['STA'] = 'connected'

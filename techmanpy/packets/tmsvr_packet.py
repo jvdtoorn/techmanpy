@@ -2,16 +2,8 @@
 
 import ast
 
-from stateful_packet import StatefulPacket
-
-# Import 'util' folder
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-if parentdir not in sys.path: sys.path.insert(0, parentdir)
-from util.exceptions import * # pylint: disable=no-name-in-module
-
-# NOTE: Make sure that the Ethernet Slave format is set to 'string'
+from .stateful_packet import *
+from ..exceptions import *
 
 class TMSVR_type:
 

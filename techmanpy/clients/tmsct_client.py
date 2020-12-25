@@ -3,15 +3,9 @@
 import sys
 import asyncio
 
-from stateful_client import StatefulClient, StatefulConnection
-
-# Import 'packets' folder
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-if parentdir not in sys.path: sys.path.insert(0, parentdir)
-from packets.packets import *
-from util.exceptions import * # pylint: disable=no-name-in-module
+from .stateful_client import *
+from ..packets import *
+from ..exceptions import *
 
 class TMSCT_commands:
 

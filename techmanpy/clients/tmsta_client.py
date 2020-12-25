@@ -2,15 +2,9 @@
 
 import asyncio
 
-from stateless_client import StatelessClient, StatelessConnection
-
-# Import 'packets' folder
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-if parentdir not in sys.path: sys.path.insert(0, parentdir)
-from packets.packets import *
-from util.exceptions import * # pylint: disable=no-name-in-module
+from .stateless_client import *
+from ..packets import *
+from ..exceptions import *
 
 class TMSTA_client(StatelessClient):
 

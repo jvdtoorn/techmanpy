@@ -1,15 +1,14 @@
 import setuptools
 import sys
 
-if sys.version_info[:2] < (3, 7):
-    raise Exception("'techmanpy' requires Python >= 3.7")
+if sys.version_info[:2] < (3, 7): raise Exception("'techmanpy' requires Python >= 3.7")
 
 with open('README.md', 'r', encoding='utf-8') as fh:
    long_description = fh.read()
 
 setuptools.setup(
    name='techmanpy-jvdt',
-   version='1.4',
+   version='1.0',
    description='Communication driver for Techman Robot manipulators',
    long_description=long_description,
    long_description_content_type='text/markdown',
