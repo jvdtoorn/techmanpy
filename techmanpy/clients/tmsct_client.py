@@ -2,7 +2,6 @@
 
 import sys
 import asyncio
-from matplotlib.cbook import flatten
 
 from stateful_client import StatefulClient, StatefulConnection
 
@@ -197,8 +196,13 @@ class TMSCT_connection(StatefulConnection, TMSCT_commands):
             if len(res.lines) == 1: raise TMSCTError(f'The command \'{enc_cmnds[0]}\' resulted in an error')
             else: raise TMSCTError(f'The following commands resulted in an error: {enc_cmnds}')
 
+   def _flatten(self, seq, scalarp=None):
+      for item in seq:
+         if item is None or isinstance(item, str) or not hasattr(item, '__iter__'): yield item
+         else: yield from self._flatten(item)
+
    def _unfold_command(self, command):
-      return (command[0], list(flatten(command[1])))
+      return (command[0], list(self._flatten(command[1])))
 
    def __getattribute__(self, attr):
       if hasattr(TMSCT_commands, attr):

@@ -1,29 +1,35 @@
 import setuptools
+import sys
+
+if sys.version_info[:2] < (3, 7):
+    raise Exception("'techmanpy' requires Python >= 3.7")
 
 with open('README.md', 'r', encoding='utf-8') as fh:
    long_description = fh.read()
 
 setuptools.setup(
-   name='techmanpy-jvdt', # Replace with your own username
-   version='1.0',
-   description='Python driver for Techman robots',
+   name='techmanpy-jvdt',
+   version='1.4',
+   description='Communication driver for Techman Robot manipulators',
    long_description=long_description,
    long_description_content_type='text/markdown',
    author='Jules van der Toorn',
    author_email='julesvandertoorn@gmail.com',
+   license='MIT',
    classifiers=[
       'Programming Language :: Python :: 3',
       'Programming Language :: Python :: 3.7',
       'License :: OSI Approved :: MIT License',
       'Operating System :: POSIX :: Linux',
-      'Development Status :: 4 - Beta',
       'Intended Audience :: Science/Research',
       'Natural Language :: English'
    ],
    keywords='techman driver manipulator robotics',
+   url='https://github.com/jvdtoorn/techmanpy',
    project_urls={
       'Source': 'https://github.com/jvdtoorn/techmanpy'
    },
-   packages=setuptools.find_packages(),
+   packages=['techmanpy'],
+   package_dir={'': '.'},
    python_requires='~=3.7',
 )

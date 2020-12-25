@@ -1,10 +1,13 @@
 # Custom ignores
 .vscode/
-.catkin_workspace
-.catkin_tools/
-__pycache__/
-test/
+local/
 TODO
+
+# Python ignores
+__pycache__/
+dist/
+env/
+*.egg-info/
 
 # General ignores
 *.com
@@ -33,6 +36,8 @@ ehthumbs.db
 Thumbs.db
 
 # ROS ignores
+.catkin_workspace
+.catkin_tools/
 devel/
 logs/
 build/
