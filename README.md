@@ -17,7 +17,7 @@ async def move():
 asyncio.run(move())
 ```
 
-And here's how to listen to TMFlow server:
+And here's how to listen to the TMFlow server:
 ```Python
 #!/usr/bin/env python
 
@@ -33,8 +33,8 @@ asyncio.run(listen())
 ```
 
 ## Requirements
-**TMFlow:** `1.80+`
-**Python:**  `3.7+`
+**TMFlow:** `1.80+`  
+**Python:** &nbsp;`3.7+`
 
 ## Installation
 ```Shell
