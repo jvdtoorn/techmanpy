@@ -1,3 +1,7 @@
+<p align="center">
+  <img height="500" src='img/logo.png'>
+</p>
+
 ## What is `techmanpy`?
 
 `techmanpy` is an easy-to-use communication driver for Techman Robots written in Python.  
