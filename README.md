@@ -1,5 +1,5 @@
 <p align="left">
-  <img height="200" src='img/logo.png'>
+  <img height="200" src='https://raw.githubusercontent.com/jvdtoorn/techmanpy/master/img/logo.png'>
 </p>
 
 [![Python version](https://img.shields.io/badge/python-3.8%2B-blue)](https://pypi.org/project/techmanpy)
