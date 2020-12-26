@@ -34,7 +34,7 @@ asyncio.run(listen())
 
 ## Requirements
 **TMFlow:** `1.80+`  
-**Python:** &nbsp; `3.7+`
+**Python:** &nbsp;`3.7+`
 
 ## Installation
 ```
