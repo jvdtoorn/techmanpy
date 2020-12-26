@@ -1,4 +1,4 @@
-# What is `techmanpy`?
+## What is `techmanpy`?
 
 `techmanpy` is an easy-to-use communication driver for Techman Robots written in Python.  
 Inspired by the official [tmr_ros1](https://github.com/TechmanRobotInc/tmr_ros1) C++ communication driver, it provides an elegant coroutine-based API.
@@ -34,16 +34,16 @@ asyncio.run(listen())
 
 ## Requirements
 **TMFlow:** `1.80+`  
-**Python:** &nbsp;`3.7+`
+**Python:** &nbsp; `3.7+`
 
 ## Installation
-```Shell
+```
 $ python3 -m pip install techmanpy
 ```
 
 ## Test connection with TMFlow
 To verify that your connection with the robot is all set-up:
-```Shell
+```
 $ python3 test_connection.py <robot IP address>
 ```
 
