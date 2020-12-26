@@ -8,7 +8,7 @@
 
 ## What is `techmanpy`?
 
-`techmanpy` is an easy-to-use communication driver for Techman robots written in Python. 
+`techmanpy` is an easy-to-use communication driver for Techman robots written in Python.
 
 With it, the state of the robot can be monitored, internal parameters can be changed and move commands can be executed. With these features it acts as a solid foundation for any custom higher-level script.
 
@@ -63,5 +63,6 @@ $ python3 test_connection.py <robot IP address>
 ## What else?
 Bug reports, patches and suggestions are welcome! Feel free to open an [issue](https://github.com/jvdtoorn/techmanpy/issues/new) or send a [pull request](https://github.com/jvdtoorn/techmanpy/pulls).
 
-`techmanpy` is not affiliated, authorized, or in any way officially connected with [Techman Robot](https://www.tm-robot.com/en/). Use this software at your own risk, it did not undergo any official quality assurance.  
+`techmanpy` is not affiliated, authorized, or in any way officially connected with [Techman Robot](https://www.tm-robot.com/en/). Use this software at your own risk, it did not undergo any official quality assurance.
+
 This package is released under the [MIT license](https://github.com/jvdtoorn/techmanpy/blob/master/LICENSE).
