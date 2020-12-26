@@ -1,5 +1,5 @@
 <p align="center">
-  <img height="500" src='img/logo.png'>
+  <img height="200" src='img/logo.png'>
 </p>
 
 ## What is `techmanpy`?
