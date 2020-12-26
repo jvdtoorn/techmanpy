@@ -14,7 +14,7 @@ With it, the state of the robot can be monitored, internal parameters can be cha
 
 By using `asyncio` for all socket communications, it provides an elegant coroutine-based API.
 
-Read the full documentation on [Read the Docs](https://techmanpy.readthedocs.io).
+Read the full documentation at the [Wiki](https://github.com/jvdtoorn/techmanpy/wiki).
 
 Here's how to command your robot to move:
 ```Python
