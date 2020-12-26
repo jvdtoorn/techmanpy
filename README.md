@@ -2,6 +2,7 @@
   <img src='https://raw.githubusercontent.com/jvdtoorn/techmanpy/master/img/logo.png'>
 </p>
 
+![TMFlow version](https://img.shields.io/badge/TMFlow-1.80%2B-green)
 [![Python version](https://img.shields.io/badge/python-3.8%2B-blue)](https://pypi.org/project/techmanpy)
 [![pypi version](https://img.shields.io/badge/pypi-v1.0-blue)](https://pypi.org/project/techmanpy)
 [![License](https://img.shields.io/badge/license-MIT-red)](https://github.com/jvdtoorn/techmanpy/blob/master/LICENSE)
