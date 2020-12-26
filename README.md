@@ -8,8 +8,11 @@
 
 ## What is `techmanpy`?
 
-`techmanpy` is an easy-to-use communication driver for Techman Robots written in Python.  
+`techmanpy` is an easy-to-use communication driver for Techman Robots written in Python.
+
 By using `asyncio` for all socket communications, it provides an elegant coroutine-based API.
+
+Read the full documentation on [Read the Docs](https://techmanpy.readthedocs.io).
 
 Here's how to command your robot to move:
 ```Python
