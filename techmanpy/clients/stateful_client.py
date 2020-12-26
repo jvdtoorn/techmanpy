@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import asyncio
-from asyncio.futures import CancelledError
+from asyncio import CancelledError
 
 from .techman_client import *
 from ..packets import *

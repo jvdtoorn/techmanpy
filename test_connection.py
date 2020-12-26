@@ -48,5 +48,7 @@ async def test_connection(robot_ip):
       if elapsed < 2: time.sleep(2 - elapsed)
 
 if __name__ == '__main__':
-   if len(sys.argv) == 2: asyncio.run(test_connection(sys.argv[1]))
+   if len(sys.argv) == 2:
+      try: asyncio.run(test_connection(sys.argv[1]))
+      except KeyboardInterrupt: print() # terminate gracefully
    else: print(f'usage: {sys.argv[0]} <robot IP address>')
