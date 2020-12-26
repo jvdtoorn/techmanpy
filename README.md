@@ -2,6 +2,10 @@
   <img height="200" src='img/logo.png'>
 </p>
 
+[![Python version](https://img.shields.io/badge/python-3.8%2B-blue)](https://pypi.org/project/techmanpy)
+[![pypi version](https://img.shields.io/badge/pypi-v1.0-blue)](https://pypi.org/project/techmanpy)
+[![License](https://img.shields.io/badge/license-MIT-red)](https://github.com/jvdtoorn/techmanpy/blob/master/LICENSE)
+
 ## What is `techmanpy`?
 
 `techmanpy` is an easy-to-use communication driver for Techman Robots written in Python.  

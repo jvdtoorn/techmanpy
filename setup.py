@@ -7,8 +7,8 @@ with open('README.md', 'r', encoding='utf-8') as fh:
    long_description = fh.read()
 
 setuptools.setup(
-   name='techmanpy',
-   version='1.0',
+   name='techmanpy-jvdt',
+   version='1.6',
    description='Communication driver for Techman robots',
    long_description=long_description,
    long_description_content_type='text/markdown',
