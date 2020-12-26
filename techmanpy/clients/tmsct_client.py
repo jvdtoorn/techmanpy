@@ -9,12 +9,6 @@ from ..exceptions import *
 
 class TMSCT_commands:
 
-   # NOTE:
-   # - Durations are in milliseconds
-   # - Sizes are in millimeters
-   # - Angles are in degrees
-   # - Percentages are between 0.0 and 1.0
-
    # ==== general commmands ====
 
    def set_queue_tag(self, tag_id, wait_for_completion=False):
@@ -32,13 +26,11 @@ class TMSCT_commands:
    def resume_project(self):
       return ('Resume', [])
 
-   # NOTE: 'base' argument can be either config name (string) or coordinate frame 
    def set_base(self, base):
       if isinstance(base, list) and len(base) != 6:
          raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('ChangeBase', [base])
 
-   # NOTE: 'tcp' argument can be either config name (string) or coordinate frame 
    def set_tcp(self, tcp, weight=None, inertia=None):
       if isinstance(tcp, list) and len(tcp) != 6:
          raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
