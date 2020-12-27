@@ -11,7 +11,7 @@
 
 `techmanpy` is an easy-to-use communication driver for Techman robots written in Python.
 
-With it, the state of the robot can be monitored, internal parameters can be changed and move commands can be executed. With these features it acts as a solid foundation for any custom higher-level script.
+With it, motion commands can be executed, internal parameters can be changed and the state of the robot can be monitored: providing a solid foundation for any custom control software.
 
 By using `asyncio` for all socket communications, it provides an elegant coroutine-based API.
 
@@ -26,7 +26,7 @@ import techmanpy
 
 async def move():
    async with techmanpy.connect_sct(robot_ip='<robot IP address>') as conn:
-      await conn.move_to_joint_angles_ptp([10, -10, 10, -10, 10, -10], 0.10, 200, 0)
+      await conn.move_to_joint_angles_ptp([10, -10, 10, -10, 10, -10], 0.10, 200)
 
 asyncio.run(move())
 ```
