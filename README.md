@@ -11,7 +11,7 @@
 
 `techmanpy` is an easy-to-use communication driver for Techman robots written in Python.
 
-With it, motion commands can be executed, internal parameters can be changed and the state of the robot can be monitored: providing a solid foundation for any custom control software.
+With it, motion commands can be executed, internal parameters can be changed and the state of the robot can be monitored: providing a solid foundation for any custom (ROS) control software.
 
 By using `asyncio` for all socket communications, it provides an elegant coroutine-based API.
 

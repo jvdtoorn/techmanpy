@@ -17,7 +17,7 @@ setuptools.setup(
    license='MIT',
    classifiers=[
       'Programming Language :: Python :: 3',
-      'Programming Language :: Python :: 3.7',
+      'Programming Language :: Python :: 3.8',
       'License :: OSI Approved :: MIT License',
       'Operating System :: POSIX :: Linux',
       'Intended Audience :: Science/Research',
