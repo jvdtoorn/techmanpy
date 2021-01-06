@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import traceback
 
 class TechmanException(Exception):
    ''' Base class for exceptions. '''
    
    def __init__(self):
       super().__init__()
-      self._msg = f'TechmanException trace:\n{traceback.format_exc()}'
+      self._msg = 'TechmanException: Something went wrong'
 
    def __str__(self): return str(self._msg).strip()
 

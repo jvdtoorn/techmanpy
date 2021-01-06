@@ -8,7 +8,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setuptools.setup(
    name='techmanpy',
-   version='1.0',
+   version='1.1',
    description='Communication driver for Techman robots',
    long_description=long_description,
    long_description_content_type='text/markdown',
@@ -28,7 +28,7 @@ setuptools.setup(
    project_urls={
       'Source': 'https://github.com/jvdtoorn/techmanpy'
    },
-   packages=['techmanpy'],
+   packages=setuptools.find_packages(),
    package_dir={'': '.'},
    python_requires='~=3.8',
 )

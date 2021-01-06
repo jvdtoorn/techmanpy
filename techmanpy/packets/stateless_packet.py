@@ -14,7 +14,7 @@ class StatelessPacket:
          elif len(args) == 2:
             self._header = args[0]
             self._data = args[1]
-      except: raise TMParseError()
+      except: raise TMParseError() from None
 
    def _encode(self, header, data):
       checksum_data = f'{header},{len(data)},{data},'

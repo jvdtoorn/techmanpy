@@ -25,7 +25,7 @@ class TMSTA_packet(StatelessPacket):
          elif len(args) == 2:
             self._header = self.HEADER
             self._data = self._encode_data(args[0], args[1])
-      except: raise TMParseError()
+      except: raise TMParseError() from None
 
    def _encode_data(self, ptype, params):
       if isinstance(ptype, int): ptype = self._encode_int(ptype)

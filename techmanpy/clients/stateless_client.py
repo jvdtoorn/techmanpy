@@ -30,8 +30,6 @@ class StatelessConnection(TechmanConnection):
       except CancelledError as e: raise e # Delegate asyncio exception
       except TechmanException as e: raise e
       except asyncio.TimeoutError: raise TMConnectError(None, msg='Did not receive a message from server') from None
-      except ConnectionError as e: raise TMConnectError(e)
+      except ConnectionError as e: raise TMConnectError(e) from None
       except RuntimeError as e:
          if 'coroutine' in str(e): raise TMConnectError(None, msg='Only one stateless outgoing request can be active at any time!') from None
-         else: raise TechmanException()
-      except Exception as e: raise TechmanException()

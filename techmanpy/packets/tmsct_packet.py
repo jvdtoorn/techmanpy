@@ -37,7 +37,7 @@ class TMSCT_packet(StatefulPacket):
          else:
             self._header = self.HEADER
             self._data = self._encode_data(*args)
-      except: raise TMParseError()
+      except: raise TMParseError() from None
 
    def _encode_data(self, *args):
       encoded = super()._encode_data(args[0])

@@ -30,14 +30,20 @@ class StatefulConnection(TechmanConnection):
       self._listen_is_awaited = False
       self._broadcast_callback = None
       self._msg_cnt = 0
+      self._quit_cond = None
 
    def add_broadcast_callback(self, broadcast_callback):
       if not self._in_listen: self._start_listen()
       self._broadcast_callback = broadcast_callback
 
-   async def keep_alive(self):
+   async def keep_alive(self, quit=None):
       self._listen_is_awaited = True
+      self._quit_cond = quit
       await self._listen_task
+
+   def quit(self):
+      def quit(): return True
+      self._quit_cond = quit
 
    async def send(self, packet):
       # Send message
@@ -57,7 +63,7 @@ class StatefulConnection(TechmanConnection):
    def _handle_exception(self, exc):
       for request in self._requests: request[1].set_exception(exc)
       self._requests = []
-      if self._listen_is_awaited: raise exc
+      if self._listen_is_awaited: raise exc from None
 
    def _on_message(self, packet):
       # Check if this is a response to ongoing request
@@ -88,7 +94,12 @@ class StatefulConnection(TechmanConnection):
    async def _listen(self):
       try:
          while True:
-            read_bytes = await self._reader.read(100000)
+            read_bytes = None
+            while read_bytes is None:
+               if self._quit_cond is not None and self._quit_cond(): break
+               try: read_bytes = await asyncio.wait_for(self._reader.read(100000), timeout=self._conn_timeout)
+               except asyncio.TimeoutError: pass
+            if self._quit_cond is not None and self._quit_cond(): break
             # Empty byte indicates lost connection
             if read_bytes == b'': raise TMConnectError(None, msg='Socket connection was closed by server')
             # Skip corrupt packet
@@ -107,8 +118,9 @@ class StatefulConnection(TechmanConnection):
                else: request[2] += 1
             # Quit loop if we are done
             if self._broadcast_callback is None and len(self._requests) == 0: break
+            if self._quit_cond is not None and self._quit_cond(): break
          self._in_listen = False
       except CancelledError as e: raise e # Delegate asyncio exception
       except TechmanException as e: self._handle_exception(e)
       except ConnectionError as e: self._handle_exception(TMConnectError(e))
-      except Exception as e: self._handle_exception(TechmanException())
+      except Exception as e: self._handle_exception(e)

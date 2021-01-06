@@ -20,7 +20,7 @@ class TechmanClient:
          reader, writer = await asyncio.open_connection(self._robot_ip, self._robot_port)
          self._connection = self._on_connection(reader, writer)
          return self._connection
-      except ConnectionError as e: raise TMConnectError(e)
+      except ConnectionError as e: raise TMConnectError(e) from None
 
    async def __aexit__(self, exc_type, exc_msg, _): self._connection._close()
 

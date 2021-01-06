@@ -9,7 +9,7 @@ class StatefulPacket(StatelessPacket):
 
    def __init__(self, *args):
       try: super().__init__(*args)
-      except: raise TMParseError()
+      except: raise TMParseError() from None
 
    def _encode_data(self, handle_id):
       return f'{handle_id},'
