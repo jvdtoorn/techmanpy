@@ -17,10 +17,11 @@ class TechmanClient:
    
    async def __aenter__(self):
       try:
-         reader, writer = await asyncio.open_connection(self._robot_ip, self._robot_port)
+         reader, writer = await asyncio.wait_for(asyncio.open_connection(self._robot_ip, self._robot_port), timeout=self._conn_timeout)
          self._connection = self._on_connection(reader, writer)
          return self._connection
       except ConnectionError as e: raise TMConnectError(e) from None
+      except asyncio.TimeoutError: raise TMConnectError(None, msg=f'Opening connection timed out after {self._conn_timeout} seconds') from None
 
    async def __aexit__(self, exc_type, exc_msg, _): self._connection._close()
 

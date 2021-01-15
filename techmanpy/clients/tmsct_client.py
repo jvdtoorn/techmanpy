@@ -11,6 +11,9 @@ class TMSCT_commands:
 
    # ==== general commmands ====
 
+   def exit_listen(self):
+      return ('ScriptExit', [])
+
    def set_queue_tag(self, tag_id, wait_for_completion=False):
       return ('QueueTag', [tag_id, 1 if wait_for_completion else 0])
 

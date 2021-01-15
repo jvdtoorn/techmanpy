@@ -115,6 +115,7 @@ class StatefulConnection(TechmanConnection):
                if request[2] > 5:
                   request[2] = 0
                   self._writer.write(request[0].encoded())
+                  await self._writer.drain()
                else: request[2] += 1
             # Quit loop if we are done
             if self._broadcast_callback is None and len(self._requests) == 0: break
