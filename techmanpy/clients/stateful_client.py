@@ -105,11 +105,14 @@ class StatefulConnection(TechmanConnection):
             # Skip corrupt packet
             elif len(read_bytes) > 5 and (read_bytes[0] != 0x24 or read_bytes[-5] != 0x2A): continue
             # Valid respone
-            res = StatefulPacket(read_bytes)
-            if res._header == 'CPERR':
-               self._handle_exception(TMProtocolError(CPERR_packet(res).description))
-               continue
-            self._on_message(res)
+            for read_bytes_part in read_bytes.split(b'$'):
+               if read_bytes_part == b'': continue
+               res = StatefulPacket(b'$' + read_bytes_part)
+               if res._header == 'CPERR':
+                  self._handle_exception(TMProtocolError(CPERR_packet(res).description))
+                  continue
+               if res._header == 'TMSTA': continue # Ignore stateless packet
+               self._on_message(res)
             # Refresh request if no answer within 5 packets
             for request in self._requests:               
                if request[2] > 5:
