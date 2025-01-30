@@ -111,9 +111,13 @@ class TMSVR_packet(StatefulPacket):
    def _decode_value(self, value):
       if value == 'true': return True
       if value == 'false': return False
-      if '"' in value: return value[1:len(value)-1]
-      if '{' in value: return ast.literal_eval(value.replace('{', '[').replace('}', ']'))
-      return ast.literal_eval(value)
+      if '"' in value: return value[1:len(value)-1]         
+      value = value.replace('{', '[').replace('}', ']')
+      value = value.replace('true', 'True').replace('false', 'False') # ast.literal_eval will fail on 'false' and 'true'
+      try:
+         return ast.literal_eval(value)
+      except:
+         return value
 
    @property
    def ptype(self): return self._decode_data(self._data)[0]
