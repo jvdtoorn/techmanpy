@@ -63,6 +63,7 @@ class TMSCT_packet(StatefulPacket):
          return ptype, status, lines
 
    def _encode_command(self, command):
+      if len(command) == 2 and len(command[1]) == 1 and command[1][0] == 'tm_script': return command[0]
       if len(command) == 2 and command[0] == TMSCT_command_type.VARIABLE: return command[1]
       name = command[0] if len(command) == 2 else command[1]
       arglist = command[1] if len(command) == 2 else command[2]

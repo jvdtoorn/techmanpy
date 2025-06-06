@@ -44,6 +44,13 @@ class TMSCT_commands:
 
    def set_load_weight(self, weight):
       return ('ChangeLoad', [weight])
+   
+   def send_tm_script(self, cmd, para = None):
+      if para is None:
+         return (cmd, ['tm_script'])
+      else:
+         if not isinstance(para, list): para = [para]
+         return (cmd, para)
 
    # ==== PVT ====
 
