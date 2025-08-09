@@ -29,6 +29,9 @@ class TMSCT_commands:
    def resume_project(self):
       return ('Resume', [])
 
+   def sleep(self, time_ms):
+      return ('Sleep', [time_ms])
+
    def set_base(self, base):
       if isinstance(base, list) and len(base) != 6:
          raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
@@ -50,7 +53,12 @@ class TMSCT_commands:
    def enter_point_pvt_mode(self):
       return ('PVTEnter', [1])
 
-   def add_pvt_point(self, tcp_point_goal, tcp_point_velocities_goal, duration):
+   def add_pvt_point(
+      self, 
+      tcp_point_goal, 
+      tcp_point_velocities_goal, 
+      duration
+   ):
       if len(tcp_point_goal) != 6 or len(tcp_point_velocities_goal) != 6:
          raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('PVTPoint', [tcp_point_goal, tcp_point_velocities_goal, duration/1000.0])
@@ -58,7 +66,12 @@ class TMSCT_commands:
    def enter_joint_pvt_mode(self):
       return ('PVTEnter', [0])
 
-   def add_pvt_joint_angles(self, joint_angles_goal, joint_angle_velocities_goal, duration):
+   def add_pvt_joint_angles(
+      self, 
+      joint_angles_goal, 
+      joint_angle_velocities_goal, 
+      duration
+   ):
       if len(joint_angles_goal) != 6 or len(joint_angle_velocities_goal) != 6:
          raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('PVTPoint', [joint_angles_goal, joint_angle_velocities_goal, duration/1000.0])
@@ -74,53 +87,117 @@ class TMSCT_commands:
 
    # ==== PTP ====
 
-   def move_to_point_ptp(self, tcp_point_goal, speed_perc, acceleration_duration, blending_perc=0.0, use_precise_positioning=False, pose_goal=None):
+   def move_to_point_ptp(
+         self, 
+         tcp_point_goal, 
+         speed_perc, 
+         acceleration_duration, 
+         blending_perc=0.0, 
+         use_precise_positioning=False, 
+         pose_goal=None
+      ):
       if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(tcp_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       arglist = ['CPP', tcp_point_goal, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), not use_precise_positioning]
       if pose_goal is not None: arglist.append(pose_goal)
       return ('PTP', arglist)
 
-   def move_to_relative_point_ptp(self, relative_point_goal, speed_perc, acceleration_duration, blending_perc=0.0, relative_to_tcp=False, use_precise_positioning=False):
+   def move_to_relative_point_ptp(
+         self, 
+         relative_point_goal, 
+         speed_perc, 
+         acceleration_duration, 
+         blending_perc=0.0, 
+         relative_to_tcp=False, 
+         use_precise_positioning=False
+      ):
       if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(relative_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('Move_PTP', ['TPP' if relative_to_tcp else 'CPP', relative_point_goal, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), not use_precise_positioning])
 
-   def move_to_joint_angles_ptp(self, joint_angles_goal, speed_perc, acceleration_duration, blending_perc=0.0, use_precise_positioning=False):
+   def move_to_joint_angles_ptp(
+         self, 
+         joint_angles_goal, 
+         speed_perc, 
+         acceleration_duration, 
+         blending_perc=0.0, 
+         use_precise_positioning=False
+      ):
       if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(joint_angles_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('PTP', ['JPP', joint_angles_goal, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), not use_precise_positioning])
 
-   def move_to_relative_joint_angles_ptp(self, relative_joint_angles_goal, speed_perc, acceleration_duration, blending_perc=0.0, use_precise_positioning=False):
+   def move_to_relative_joint_angles_ptp(
+         self, 
+         relative_joint_angles_goal, 
+         speed_perc, 
+         acceleration_duration, 
+         blending_perc=0.0, 
+         use_precise_positioning=False
+      ):
       if speed_perc > 1.0 or blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(relative_joint_angles_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('Move_PTP', ['JPP', relative_joint_angles_goal, int(100 * speed_perc), int(acceleration_duration), int(100 * blending_perc), not use_precise_positioning])
 
    # ==== Path ====
 
-   def move_to_point_path(self, tcp_point_goal, velocity, acceleration_duration, blending_perc=0.0):
+   def move_to_point_path(
+         self, 
+         tcp_point_goal, 
+         velocity, 
+         acceleration_duration, 
+         blending_perc=0.0
+      ):
       if blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(tcp_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('PLine', ['CAP', tcp_point_goal, int(velocity), int(acceleration_duration), int(100 * blending_perc)])
 
-   def move_to_relative_point_path(self, relative_point_goal, velocity, acceleration_duration, blending_perc=0.0, relative_to_tcp=False):
+   def move_to_relative_point_path(
+         self, 
+         relative_point_goal, 
+         velocity, 
+         acceleration_duration, 
+         blending_perc=0.0, 
+         relative_to_tcp=False
+      ):
       if blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(relative_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('Move_PLine', ['TAP' if relative_to_tcp else 'CAP', relative_point_goal, int(velocity), int(acceleration_duration), int(100 * blending_perc)])
 
-   def move_to_joint_angles_path(self, joint_angles_goal, velocity, acceleration_duration, blending_perc=0.0):
+   def move_to_joint_angles_path(
+         self, 
+         joint_angles_goal, 
+         velocity, 
+         acceleration_duration, 
+         blending_perc=0.0
+      ):
       if blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(joint_angles_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('PLine', ['JAP', joint_angles_goal, int(velocity), int(acceleration_duration), int(100 * blending_perc)])
 
-   def move_to_relative_joint_angles_path(self, relative_joint_angles_goal, velocity, acceleration_duration, blending_perc=0.0):
+   def move_to_relative_joint_angles_path(
+         self, 
+         relative_joint_angles_goal, 
+         velocity, 
+         acceleration_duration, 
+         blending_perc=0.0
+      ):
       if blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(relative_joint_angles_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       return ('Move_PLine', ['JAP', relative_joint_angles_goal, int(velocity), int(acceleration_duration), int(100 * blending_perc)])
 
    # ==== Line ====
 
-   def move_to_point_line(self, tcp_point_goal, speed, acceleration_duration, blending=0.0, speed_is_velocity=False, blending_is_radius=False, use_precise_positioning=False):
+   def move_to_point_line(
+         self, 
+         tcp_point_goal, 
+         speed, 
+         acceleration_duration, 
+         blending=0.0, 
+         speed_is_velocity=False, 
+         blending_is_radius=False, 
+         use_precise_positioning=False
+      ):
       if (not speed_is_velocity and speed > 1.0) or (not blending_is_radius and blending > 1.0): raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(tcp_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       data_mode = f'C{"A" if speed_is_velocity else "P"}{"R" if blending_is_radius else "P"}'
@@ -128,7 +205,17 @@ class TMSCT_commands:
       blending = int(blending if blending_is_radius else (100 * blending))
       return ('Line', [data_mode, tcp_point_goal, speed, int(acceleration_duration), blending, not use_precise_positioning])
 
-   def move_to_relative_point_line(self, relative_point_goal, speed, acceleration_duration, blending=0.0, relative_to_tcp=False, speed_is_velocity=False, blending_is_radius=False, use_precise_positioning=False):
+   def move_to_relative_point_line(
+         self, 
+         relative_point_goal, 
+         speed, 
+         acceleration_duration, 
+         blending=0.0, 
+         relative_to_tcp=False, 
+         speed_is_velocity=False, 
+         blending_is_radius=False, 
+         use_precise_positioning=False
+      ):
       if (not speed_is_velocity and speed > 1.0) or (not blending_is_radius and blending > 1.0): raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(relative_point_goal) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       data_mode = f'{"T" if relative_to_tcp else "C"}{"A" if speed_is_velocity else "P"}{"R" if blending_is_radius else "P"}'
@@ -138,11 +225,46 @@ class TMSCT_commands:
 
    # ==== Circle ====
 
-   def move_on_circle(self, tcp_point_1, tcp_point_2, speed, acceleration_duration, arc_angle=0, blending_perc=0.0, speed_is_velocity=False, use_precise_positioning=False):
+   def move_on_circle(
+         self, 
+         tcp_point_1, 
+         tcp_point_2, 
+         speed, 
+         acceleration_duration, 
+         arc_angle=0, 
+         blending_perc=0.0, 
+         speed_is_velocity=False, 
+         use_precise_positioning=False
+      ):
       if (not speed_is_velocity and speed > 1.0) or blending_perc > 1.0: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): percentages should have value between 0.0 and 1.0')
       if len(tcp_point_1) != 6 or len(tcp_point_2) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
       speed = int(speed if speed_is_velocity else (100 * speed))
       return ('Circle', ['CAP' if speed_is_velocity else 'CPP', tcp_point_1, tcp_point_2, speed, int(acceleration_duration), int(100 * blending_perc), arc_angle, not use_precise_positioning])
+
+   # ==== Position ==== #! Only available in TM Flow >= 2.20
+   def activate_position(
+         self,
+         control_mode:str,
+         acceleration_duration:int=500,
+         gain:float=4.0,
+         protection_time_interval:int=1000
+      ):
+      if not (control_mode in ['C', 'T', 'J']):
+         raise TMSCTError("Target control mode NOT supported.")
+      if not 150 <= acceleration_duration <= 2000:
+         raise TMSCTError("Invalid value. Please set in [150, 2000].")
+      if not 1<= gain <= 100:
+         raise TMSCTError("Invalid value. Please set in [1,100].")
+      if not protection_time_interval >=20:
+         raise TMSCTError("Invalid value. Please set >= 20.")
+      return ('Position', [True, control_mode, acceleration_duration, gain, protection_time_interval])
+
+   def deactivate_position(self):
+      return ('Position', [False])
+
+   def position(self, action):
+      if len(action) != 6: raise TMSCTError(f'{sys._getframe().f_code.co_name}(): position array should have exactly 6 elements')
+      return ('Position', action)
 
 class TMSCT_client(StatefulClient):
 
